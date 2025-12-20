@@ -1,0 +1,12 @@
+# Changelog
+
+## [0.1.0-beta.0] - 2025-12-20
+
+### Added
+
+- Initial implementation of the backend interface from `ratatui-core 0.1.0-beta.0`.
+- Support for draw targets from `embedded-graphics 0.8.1` with an optional flush callback.
+- Support for text renderers from `mplusfonts 0.3.2` with its parametrized bitmap font.
+- Configurable 16 and 256-color lookup tables, with `xterm`’s color palette used by default.
+
+[0.1.0-beta.0]: https://github.com/iddey/dumo/releases/tag/v0.1.0-beta.0
