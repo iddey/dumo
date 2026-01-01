@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- The `Error` associated with the draw target for the backend no longer has to implement `Display`.
+
 ## [0.1.0-beta.0] - 2025-12-20
 
 ### Added

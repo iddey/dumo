@@ -1,4 +1,4 @@
-use core::fmt::{Debug, Display};
+use core::fmt::Debug;
 use core::marker::PhantomData;
 
 use embedded_graphics::draw_target::DrawTarget;
@@ -15,7 +15,7 @@ pub struct FlushWrapper<B, F, D>
 where
     B: DrawTargetBackend<F, D, Error = Error<D::Error>>,
     D: DrawTarget,
-    D::Error: Display + Debug,
+    D::Error: Debug,
     F: FnMut(&mut D) -> Result<(), D::Error>,
 {
     backend: B,
@@ -27,7 +27,7 @@ impl<B, F, D> FlushWrapper<B, F, D>
 where
     B: DrawTargetBackend<F, D, Error = Error<D::Error>>,
     D: DrawTarget,
-    D::Error: Display + Debug,
+    D::Error: Debug,
     F: FnMut(&mut D) -> Result<(), D::Error>,
 {
     pub const fn new(backend: B, flush_fn: F) -> Self {
@@ -43,7 +43,7 @@ impl<B, F, D> Backend for FlushWrapper<B, F, D>
 where
     B: DrawTargetBackend<F, D, Error = Error<D::Error>>,
     D: DrawTarget,
-    D::Error: Display + Debug,
+    D::Error: Debug,
     F: FnMut(&mut D) -> Result<(), D::Error>,
 {
     type Error = B::Error;

@@ -2,7 +2,7 @@ mod cell;
 mod rect;
 mod size;
 
-use core::fmt::{Debug, Display};
+use core::fmt::Debug;
 
 use self::cell::CellSize;
 use self::rect::RectangleExt;
@@ -38,7 +38,7 @@ where
     C: PixelColor + From<C::Raw>,
     D: DrawTarget,
     D::Color: PixelColor + Default + Invert + Screen + WeightedAvg + From<Rgb888>,
-    D::Error: Display + Debug,
+    D::Error: Debug,
     RawDataSlice<'a, C::Raw, BigEndian>: IntoIterator<Item = C::Raw>,
     BitmapFontStyle<'a, 'b, D::Color, C, 1>: TextRenderer<Color = D::Color>,
 {
@@ -69,7 +69,7 @@ where
     C: PixelColor + From<C::Raw>,
     D: DrawTarget,
     D::Color: PixelColor + Default + Invert + Screen + WeightedAvg + From<Rgb888>,
-    D::Error: Display + Debug,
+    D::Error: Debug,
     RawDataSlice<'a, C::Raw, BigEndian>: IntoIterator<Item = C::Raw>,
     BitmapFontStyle<'a, 'b, D::Color, C, 1>: TextRenderer<Color = D::Color>,
 {
@@ -100,7 +100,7 @@ where
     C: PixelColor + From<C::Raw>,
     D: DrawTarget,
     D::Color: PixelColor + Default + Invert + Screen + WeightedAvg + From<Rgb888>,
-    D::Error: Display + Debug,
+    D::Error: Debug,
     RawDataSlice<'a, C::Raw, BigEndian>: IntoIterator<Item = C::Raw>,
     BitmapFontStyle<'a, 'b, D::Color, C, 1>: TextRenderer<Color = D::Color>,
 {
@@ -298,7 +298,7 @@ where
     C: PixelColor + From<C::Raw>,
     D: DrawTarget,
     D::Color: PixelColor + Default + Invert + Screen + WeightedAvg + From<Rgb888>,
-    D::Error: Display + Debug,
+    D::Error: Debug,
     F: FnMut(&mut D) -> Result<(), D::Error>,
     RawDataSlice<'a, C::Raw, BigEndian>: IntoIterator<Item = C::Raw>,
     BitmapFontStyle<'a, 'b, D::Color, C, 1>: TextRenderer<Color = D::Color>,
