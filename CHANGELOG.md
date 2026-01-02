@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- The built-in `WIN_16` and `WEB_256` palettes, which offer more familiar, basic color definitions.
+
 ### Changed
 
 - The `Error` associated with the draw target for the backend no longer has to implement `Display`.

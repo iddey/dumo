@@ -1,14 +1,46 @@
+//! Color palettes that allow the backend to render text in color.
+//!
+//! Color definitions are found in an instance of [`Palette`], while [`Palettes`] provides palettes
+//! for quick configuration of the backend to use a color scheme other than the default one.
+
 use embedded_graphics::pixelcolor::{PixelColor, Rgb888};
 use ratatui_core::style::Color;
 
 pub use crate::builder::PaletteBuilder;
 pub use crate::palette::{Palette, Palettes};
 
+/// Color mapping to type `T`, where an instance of [`Palette`] adds a layer of indirection between
+/// the value to map and the return value.
+///
+/// A type that implements this trait has a set of mappings, one set for every [`Palette`] variant.
 pub trait MapWith<T: PixelColor> {
+    /// Maps the value, retrieving the corresponding color from the specified palette.
     fn map_with(&self, palette: Palette<T>) -> Option<T>;
 }
 
 impl<T: PixelColor + From<Rgb888>> MapWith<T> for Color {
+    /// Maps the color, retrieving the corresponding color from the specified palette.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use dumo::color::{MapWith, Palettes};
+    /// # use embedded_graphics::pixelcolor::Rgb565;
+    /// # use embedded_graphics::prelude::*;
+    /// # use ratatui::prelude::*;
+    ///
+    /// let color = Color::DarkGray;
+    /// let palette = Rgb565::XTERM_256;
+    /// let result = color.map_with(palette);
+    ///
+    /// assert_eq!(result, Some(Rgb565::CSS_GRAY));
+    ///
+    /// let color = Color::Reset;
+    /// let palette = Rgb565::XTERM_256;
+    /// let result = color.map_with(palette);
+    ///
+    /// assert_eq!(result, None);
+    /// ```
     fn map_with(&self, palette: Palette<T>) -> Option<T> {
         match palette {
             Palette::Reset => None,
