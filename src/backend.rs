@@ -83,7 +83,7 @@ where
             font_bold: None,
             fg_reset: None,
             bg_reset: None,
-            palette: D::Color::XTERM_16,
+            palette: D::Color::XTERM_256,
         }
     }
 
