@@ -5,6 +5,7 @@
 ### Added
 
 - The built-in `WIN_16` and `WEB_256` palettes, which offer more familiar, basic color definitions.
+- Trait for configuring the backend, even one that has wrappers, borrowing it back from a terminal.
 
 ### Changed
 

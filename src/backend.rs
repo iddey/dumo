@@ -30,6 +30,8 @@ use crate::error::{Error, GetCursorError, MeasureError, SetCursorError};
 
 pub use crate::wrapper::flush::FlushWrapper;
 
+/// Backend for Ratatui that renders to a display with the [`embedded-graphics`](embedded_graphics)
+/// crate, using fixed-width bitmap fonts from the [`mplusfonts`] crate.
 #[non_exhaustive]
 #[derive(Debug)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
@@ -56,12 +58,85 @@ where
     pub palette: Palette<'c, D::Color>,
 }
 
+/// Backend with a reference to a draw target.
+///
+/// A backend or backend wrapper that implements this trait is able to call functions that expect a
+/// reference with exclusive access to a draw target as an argument.
 pub trait DrawTargetBackend<F, D>: Backend
 where
     D: DrawTarget,
     F: FnMut(&mut D) -> Result<(), D::Error>,
 {
+    /// Invoke the specified function item, having it called by the backend, passing a reference to
+    /// the draw target, to which the backend holds an exclusive reference, as an argument.
     fn call(&mut self, f: &mut F) -> Result<(), D::Error>;
+}
+
+/// Backend configuration retrieval and modification.
+///
+/// A backend or backend wrapper that implements this trait allows its fields that are configurable
+/// to have their values read or have new values assigned.
+pub trait ConfigureBackend<'a, 'b, 'c, T, C>
+where
+    C: PixelColor + From<C::Raw>,
+    T: PixelColor + Default + Invert + Screen + WeightedAvg + From<Rgb888>,
+    RawDataSlice<'a, C::Raw, BigEndian>: IntoIterator<Item = C::Raw>,
+{
+    /// Returns the bitmap font to use in general.
+    fn font(&self) -> &'b BitmapFont<'a, C, 1>;
+
+    /// Sets the bitmap font to use in general.
+    ///
+    /// This bitmap font is used to render text that either has no modifiers set, is set to italic,
+    /// and also text that is set to bold, when the bitmap font for when text should be bold is not
+    /// set to a value.
+    fn set_font(&mut self, font: &'b BitmapFont<'a, C, 1>);
+
+    /// Returns the optional bitmap font for when text should be bold.
+    ///
+    /// When not set to a value, the backend renders all texts, including text that should be bold,
+    /// using the regular font.
+    fn font_bold(&self) -> Option<&'b BitmapFont<'a, C, 1>>;
+
+    /// Sets the optional bitmap font for when text should be bold.
+    ///
+    /// When not set to a value, the backend renders all texts, including text that should be bold,
+    /// using the regular font.
+    ///
+    /// This bitmap font and the regular one should have the same cell size; otherwise, the backend
+    /// will introduce clipping or padding with the background color in character cells, the reason
+    /// being that the cell size is always calculated using the regular font.
+    fn set_font_bold(&mut self, font_bold: Option<&'b BitmapFont<'a, C, 1>>);
+
+    /// Returns the optional foreground color to use in case no specific color is set.
+    ///
+    /// When not set to a value, the backend uses the inverse of the default value for type `T`.
+    fn fg_reset(&self) -> Option<T>;
+
+    /// Sets the optional foreground color to use in case no specific color is set.
+    ///
+    /// When not set to a value, the backend uses the inverse of the default value for type `T`.
+    ///
+    /// This color is used as the default foreground color, when the text color is reset.
+    fn set_fg_reset(&mut self, fg_reset: Option<T>);
+
+    /// Returns the optional background color to use in case no specific color is set.
+    ///
+    /// When not set to a value, the backend uses the default value for type `T`.
+    fn bg_reset(&self) -> Option<T>;
+
+    /// Sets the optional background color to use in case no specific color is set.
+    ///
+    /// When not set to a value, the backend uses the default value for type `T`.
+    ///
+    /// This color is used as the default background color, when the text background color is reset.
+    fn set_bg_reset(&mut self, bg_reset: Option<T>);
+
+    /// Returns the color palette for looking up ANSI colors by index, including the 16 named ones.
+    fn palette(&self) -> Palette<'c, T>;
+
+    /// Sets the color palette for looking up ANSI colors by index, including the 16 named ones.
+    fn set_palette(&mut self, palette: Palette<'c, T>);
 }
 
 impl<'a, 'b, 'c, 'd, D, C> DumoBackend<'a, 'b, 'c, 'd, D, C>
@@ -305,5 +380,56 @@ where
 {
     fn call(&mut self, f: &mut F) -> Result<(), D::Error> {
         f(self.target)
+    }
+}
+
+impl<'a, 'b, 'c, D, C> ConfigureBackend<'a, 'b, 'c, D::Color, C>
+    for DumoBackend<'a, 'b, 'c, '_, D, C>
+where
+    C: PixelColor + From<C::Raw>,
+    D: DrawTarget,
+    D::Color: PixelColor + Default + Invert + Screen + WeightedAvg + From<Rgb888>,
+    D::Error: Debug,
+    RawDataSlice<'a, C::Raw, BigEndian>: IntoIterator<Item = C::Raw>,
+    BitmapFontStyle<'a, 'b, D::Color, C, 1>: TextRenderer<Color = D::Color>,
+{
+    fn font(&self) -> &'b BitmapFont<'a, C, 1> {
+        self.font
+    }
+
+    fn set_font(&mut self, font: &'b BitmapFont<'a, C, 1>) {
+        self.font = font;
+    }
+
+    fn font_bold(&self) -> Option<&'b BitmapFont<'a, C, 1>> {
+        self.font_bold
+    }
+
+    fn set_font_bold(&mut self, font_bold: Option<&'b BitmapFont<'a, C, 1>>) {
+        self.font_bold = font_bold;
+    }
+
+    fn fg_reset(&self) -> Option<D::Color> {
+        self.fg_reset
+    }
+
+    fn set_fg_reset(&mut self, fg_reset: Option<D::Color>) {
+        self.fg_reset = fg_reset;
+    }
+
+    fn bg_reset(&self) -> Option<D::Color> {
+        self.bg_reset
+    }
+
+    fn set_bg_reset(&mut self, bg_reset: Option<D::Color>) {
+        self.bg_reset = bg_reset;
+    }
+
+    fn palette(&self) -> Palette<'c, D::Color> {
+        self.palette
+    }
+
+    fn set_palette(&mut self, palette: Palette<'c, D::Color>) {
+        self.palette = palette;
     }
 }
