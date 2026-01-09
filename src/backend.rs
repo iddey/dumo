@@ -62,14 +62,10 @@ where
 ///
 /// A backend or backend wrapper that implements this trait is able to call functions that expect a
 /// reference with exclusive access to a draw target as an argument.
-pub trait DrawTargetBackend<F, D>: Backend
-where
-    D: DrawTarget,
-    F: FnMut(&mut D) -> Result<(), D::Error>,
-{
-    /// Invoke the specified function item, having it called by the backend, passing a reference to
-    /// the draw target, to which the backend holds an exclusive reference, as an argument.
-    fn call(&mut self, f: &mut F) -> Result<(), D::Error>;
+pub trait DrawTargetBackend<D: DrawTarget>: Backend {
+    /// Invokes the specified function item, which gets to access the draw target in the scope of a
+    /// function call.
+    fn call(&mut self, f: impl FnMut(&mut D) -> Result<(), D::Error>) -> Result<(), D::Error>;
 }
 
 /// Backend configuration retrieval and modification.
@@ -148,6 +144,8 @@ where
     RawDataSlice<'a, C::Raw, BigEndian>: IntoIterator<Item = C::Raw>,
     BitmapFontStyle<'a, 'b, D::Color, C, 1>: TextRenderer<Color = D::Color>,
 {
+    /// Creates a new backend with exclusive access to the specified draw target, configuring it to
+    /// use the specified bitmap font for text rendering.
     pub const fn new(target: &'d mut D, font: &'b BitmapFont<'a, C, 1>) -> Self
     where
         D::Color: Palettes<'c>,
@@ -162,6 +160,13 @@ where
         }
     }
 
+    /// Returns the backend with a new wrapper around it, adding the specified function item to the
+    /// backend. Using this wrapper, the backend will proceed to call the function on request, when
+    /// no further changes will be made to the draw target in a given frame; this allows for device
+    /// drivers to be updated as part of the function call to push pixel information to the display
+    /// as needed.
+    ///
+    /// Backends without this wrapper take no action in the [`Backend::flush`] method.
     pub const fn with_flush<F>(self, flush_fn: F) -> FlushWrapper<Self, F, D>
     where
         F: FnMut(&mut D) -> Result<(), D::Error>,
@@ -368,17 +373,16 @@ where
     }
 }
 
-impl<'a, 'b, 'c, F, D, C> DrawTargetBackend<F, D> for DumoBackend<'a, 'b, 'c, '_, D, C>
+impl<'a, 'b, 'c, D, C> DrawTargetBackend<D> for DumoBackend<'a, 'b, 'c, '_, D, C>
 where
     C: PixelColor + From<C::Raw>,
     D: DrawTarget,
     D::Color: PixelColor + Default + Invert + Screen + WeightedAvg + From<Rgb888>,
     D::Error: Debug,
-    F: FnMut(&mut D) -> Result<(), D::Error>,
     RawDataSlice<'a, C::Raw, BigEndian>: IntoIterator<Item = C::Raw>,
     BitmapFontStyle<'a, 'b, D::Color, C, 1>: TextRenderer<Color = D::Color>,
 {
-    fn call(&mut self, f: &mut F) -> Result<(), D::Error> {
+    fn call(&mut self, mut f: impl FnMut(&mut D) -> Result<(), D::Error>) -> Result<(), D::Error> {
         f(self.target)
     }
 }

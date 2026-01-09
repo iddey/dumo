@@ -9,11 +9,13 @@ use ratatui_core::layout::{Position, Size};
 use crate::backend::DrawTargetBackend;
 use crate::error::Error;
 
+/// Wrapper with a function item for backends to call, flushing the changes made to the draw target
+/// on request, which is needed for certain display device drivers.
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct FlushWrapper<B, F, D>
 where
-    B: DrawTargetBackend<F, D, Error = Error<D::Error>>,
+    B: DrawTargetBackend<D, Error = Error<D::Error>>,
     D: DrawTarget,
     D::Error: Debug,
     F: FnMut(&mut D) -> Result<(), D::Error>,
@@ -25,11 +27,14 @@ where
 
 impl<B, F, D> FlushWrapper<B, F, D>
 where
-    B: DrawTargetBackend<F, D, Error = Error<D::Error>>,
+    B: DrawTargetBackend<D, Error = Error<D::Error>>,
     D: DrawTarget,
     D::Error: Debug,
     F: FnMut(&mut D) -> Result<(), D::Error>,
 {
+    /// Creates a new wrapper around the specified backend, configuring the specified function item
+    /// as the one to invoke when the flush method of the backend is called. All other methods call
+    /// the backend as if there was no wrapper around it.
     pub const fn new(backend: B, flush_fn: F) -> Self {
         Self {
             backend,
@@ -41,7 +46,7 @@ where
 
 impl<B, F, D> Backend for FlushWrapper<B, F, D>
 where
-    B: DrawTargetBackend<F, D, Error = Error<D::Error>>,
+    B: DrawTargetBackend<D, Error = Error<D::Error>>,
     D: DrawTarget,
     D::Error: Debug,
     F: FnMut(&mut D) -> Result<(), D::Error>,
