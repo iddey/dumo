@@ -9,6 +9,8 @@ use ratatui_core::layout::{Position, Size};
 use crate::backend::DrawTargetBackend;
 use crate::error::Error;
 
+use super::Wrapper;
+
 /// Wrapper with a function item for backends to call, flushing the changes made to the draw target
 /// on request, which is needed for certain display device drivers.
 #[derive(Debug, Clone)]
@@ -94,5 +96,28 @@ where
 
     fn flush(&mut self) -> Result<(), Self::Error> {
         self.backend.call(&mut self.flush_fn).map_err(Error::Flush)
+    }
+}
+
+/// Wrapper around a backend or another backend wrapper.
+impl<B, F, D> Wrapper for FlushWrapper<B, F, D>
+where
+    B: DrawTargetBackend<D, Error = Error<D::Error>>,
+    D: DrawTarget,
+    D::Error: Debug,
+    F: FnMut(&mut D) -> Result<(), D::Error>,
+{
+    type Inner = B;
+
+    fn inner(&self) -> &Self::Inner {
+        &self.backend
+    }
+
+    fn inner_mut(&mut self) -> &mut Self::Inner {
+        &mut self.backend
+    }
+
+    fn into_inner(self) -> Self::Inner {
+        self.backend
     }
 }
