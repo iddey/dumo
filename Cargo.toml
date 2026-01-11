@@ -22,6 +22,8 @@ seq-macro = "0.3.6"
 [dev-dependencies]
 embedded-graphics-simulator = "0.8.0"
 ratatui = { version = "0.30.0-beta.0", default-features = false }
+chrono = { version = "0.4", features = ["clock"] }
+tui-big-text = "0.8.1"
 
 [features]
 defmt = ["dep:defmt", "embedded-graphics/defmt", "mplusfonts/defmt"]
