@@ -160,20 +160,6 @@ where
             palette: D::Color::XTERM_256,
         }
     }
-
-    /// Returns the backend with a new wrapper around it, adding the specified function item to the
-    /// backend. Using this wrapper, the backend will proceed to call the function on request, when
-    /// no further changes will be made to the draw target in a given frame; this allows for device
-    /// drivers to be updated as part of the function call to push pixel information to the display
-    /// as needed.
-    ///
-    /// Backends without this wrapper take no action in the [`Backend::flush`] method.
-    pub const fn with_flush<F>(self, flush_fn: F) -> FlushWrapper<Self, F, D>
-    where
-        F: FnMut(&mut D) -> Result<(), D::Error>,
-    {
-        FlushWrapper::new(self, flush_fn)
-    }
 }
 
 impl<'a, 'b, 'c, D, C> Backend for DumoBackend<'a, 'b, 'c, '_, D, C>
