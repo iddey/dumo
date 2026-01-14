@@ -6,6 +6,7 @@ pub mod flush;
 use core::fmt::Debug;
 
 use embedded_graphics::draw_target::DrawTarget;
+use embedded_graphics::geometry::AnchorX;
 use embedded_graphics::iterator::raw::RawDataSlice;
 use embedded_graphics::pixelcolor::raw::BigEndian;
 use embedded_graphics::pixelcolor::{PixelColor, Rgb888};
@@ -99,5 +100,13 @@ where
 
     fn set_palette(&mut self, palette: Palette<'c, T>) {
         self.inner_mut().set_palette(palette);
+    }
+
+    fn anchor_x(&self) -> AnchorX {
+        self.inner().anchor_x()
+    }
+
+    fn set_anchor_x(&mut self, anchor_x: AnchorX) {
+        self.inner_mut().set_anchor_x(anchor_x);
     }
 }

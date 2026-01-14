@@ -7,16 +7,15 @@ use core::fmt::Debug;
 use self::cell::CellSize;
 use self::rect::RectangleExt;
 use self::size::SizeExt;
-use embedded_graphics::draw_target::DrawTarget;
-use embedded_graphics::draw_target::DrawTargetExt;
-use embedded_graphics::geometry::Point;
+use embedded_graphics::draw_target::{DrawTarget, DrawTargetExt};
+use embedded_graphics::geometry::{AnchorX, Point};
 use embedded_graphics::iterator::raw::RawDataSlice;
-use embedded_graphics::pixelcolor::PixelColor;
-use embedded_graphics::pixelcolor::Rgb888;
 use embedded_graphics::pixelcolor::raw::BigEndian;
+use embedded_graphics::pixelcolor::{PixelColor, Rgb888};
 use embedded_graphics::primitives::Rectangle;
 use embedded_graphics::text::renderer::TextRenderer;
 use embedded_graphics::text::{Baseline, DecorationColor};
+use embedded_graphics::transform::Transform;
 use mplusfonts::BitmapFont;
 use mplusfonts::color::{Invert, Screen, WeightedAvg};
 use mplusfonts::style::BitmapFontStyle;
@@ -57,6 +56,11 @@ where
     pub bg_reset: Option<D::Color>,
     /// The color palette for looking up ANSI colors by index, including the 16 named ones.
     pub palette: Palette<'c, D::Color>,
+    /// The sides of cells that should be aligned in case the set of glyph images that represent a
+    /// given character or character cluster span a different number of cells than expected in the
+    /// Unicode standard and Ratatui. For example, `▲` and `▼` have graphics that require cropping,
+    /// and the _x_-axis anchor point determines which sections to draw.
+    pub anchor_x: AnchorX,
 }
 
 /// Backend with a reference to a draw target.
@@ -134,6 +138,12 @@ where
 
     /// Sets the color palette for looking up ANSI colors by index, including the 16 named ones.
     fn set_palette(&mut self, palette: Palette<'c, T>);
+
+    /// Returns the _x_-axis anchor point for which sides of cells to align in case of disagreement.
+    fn anchor_x(&self) -> AnchorX;
+
+    /// Sets the _x_-axis anchor point for which sides of cells to align in case of disagreement.
+    fn set_anchor_x(&mut self, anchor_x: AnchorX);
 }
 
 impl<'a, 'b, 'c, 'd, D, C> DumoBackend<'a, 'b, 'c, 'd, D, C>
@@ -158,6 +168,7 @@ where
             fg_reset: None,
             bg_reset: None,
             palette: D::Color::XTERM_256,
+            anchor_x: AnchorX::Left,
         }
     }
 }
@@ -178,6 +189,8 @@ where
         I: Iterator<Item = (u16, u16, &'z Cell)>,
     {
         use MeasureError::*;
+        use embedded_graphics::geometry::Size;
+        use unicode_width::UnicodeWidthStr;
 
         const ORIGIN: Point = Point::zero();
         const BASELINE: Baseline = Baseline::Top;
@@ -227,35 +240,49 @@ where
                 y: ORIGIN.y.saturating_add_unsigned(y_offset),
             };
 
-            let metrics = renderer.measure_string(text, top_left, BASELINE);
-            let line_height = renderer.line_height();
-            let bottom_right = Point {
-                x: metrics.next_position.x,
-                y: metrics.next_position.y.saturating_add_unsigned(line_height),
-            };
+            let columns = text.width().try_into().unwrap_or(u32::MAX);
+            let pixels = cell_size.width.checked_mul(columns);
+            let explicit_width = pixels.ok_or(InvalidSize)?;
+            let size = Size::new(explicit_width, renderer.line_height());
+            let clip_area = Rectangle { top_left, size };
 
-            let clip_area = Rectangle::with_corners(top_left, bottom_right);
-            let mut adapter = self.target.clipped(&clip_area);
+            let metrics = renderer.measure_string(text, top_left, BASELINE);
+            let pixels = metrics.next_position.x.saturating_sub(top_left.x);
+            let inherent_width = pixels.try_into().unwrap_or_default();
+            let crop_area = clip_area.resized_width(inherent_width, self.anchor_x);
+
+            let mut adapter = self.target.cropped(&crop_area);
+            let mut adapter = adapter.clipped(&clip_area.translate(-crop_area.top_left));
 
             let is_bold = cell.modifier.intersects(Modifier::BOLD);
             if is_bold && let Some(font_bold) = self.font_bold {
                 renderer.font = font_bold;
                 renderer
-                    .draw_string(text, top_left, BASELINE, &mut adapter)
+                    .draw_string(text, Point::zero(), BASELINE, &mut adapter)
                     .map_err(Error::Draw)?;
 
-                let metrics = renderer.measure_string(text, top_left, BASELINE);
+                let metrics = renderer.measure_string(text, crop_area.top_left, BASELINE);
+                let left = clip_area.left_of(&metrics.bounding_box);
                 let right = clip_area.right_of(&metrics.bounding_box);
-                let below = clip_area.left_of(&right).below(&metrics.bounding_box);
-                for area in [right, below] {
+                let middle = clip_area.left_of(&right).right_of(&left);
+                let below = middle.below(&metrics.bounding_box);
+                for area in [left, right, below] {
                     self.target
                         .fill_solid(&area, background_color)
                         .map_err(Error::Draw)?;
                 }
             } else {
                 renderer
-                    .draw_string(text, top_left, BASELINE, &mut adapter)
+                    .draw_string(text, Point::zero(), BASELINE, &mut adapter)
                     .map_err(Error::Draw)?;
+
+                let left = clip_area.left_of(&crop_area);
+                let right = clip_area.right_of(&crop_area);
+                for area in [left, right] {
+                    self.target
+                        .fill_solid(&area, background_color)
+                        .map_err(Error::Draw)?;
+                }
             }
         }
 
@@ -422,5 +449,13 @@ where
 
     fn set_palette(&mut self, palette: Palette<'c, D::Color>) {
         self.palette = palette;
+    }
+
+    fn anchor_x(&self) -> AnchorX {
+        self.anchor_x
+    }
+
+    fn set_anchor_x(&mut self, anchor_x: AnchorX) {
+        self.anchor_x = anchor_x;
     }
 }

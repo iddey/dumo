@@ -8,6 +8,11 @@
 - Trait for configuring the backend, even one that has wrappers, borrowing it back from a terminal.
 - First two examples that use `embedded-graphics-simulator`: clock animation and built-in palettes.
 
+### Fixed
+
+- Font graphics being drawn to a different number of cells than expected by Ratatui. The graphics
+  data remain unchanged and are managed through cropping and padding as needed.
+
 ### Changed
 
 - The `Error` associated with the draw target for the backend no longer has to implement `Display`.
