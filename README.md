@@ -5,8 +5,8 @@ _dumó_, meaning back, tail-end, end-piece of a bread loaf) is an [`embedded-gra
 [`ratatui`] v0.30.0 “Bryndza” built on the new [`ratatui-core`] crate. It’s still work-in-progress.
 
 [`embedded-graphics`]: https://crates.io/crates/embedded-graphics
-[`ratatui`]: https://crates.io/crates/ratatui/0.30.0-beta.0
-[`ratatui-core`]: https://crates.io/crates/ratatui-core/0.1.0-beta.0
+[`ratatui`]: https://crates.io/crates/ratatui/0.30.0
+[`ratatui-core`]: https://crates.io/crates/ratatui-core/0.1.0
 
 ## Minimum supported Rust version
 

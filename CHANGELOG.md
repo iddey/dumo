@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [0.1.0-beta.1] - 2026-01-15
 
 ### Added
 
@@ -16,6 +16,8 @@
 ### Changed
 
 - The `Error` associated with the draw target for the backend no longer has to implement `Display`.
+- Upgrade dependencies: `ratatui-core 0.1.0`.
+- Upgrade dev-dependencies: `ratatui 0.30.0`.
 
 ## [0.1.0-beta.0] - 2025-12-20
 
@@ -27,3 +29,4 @@
 - Configurable 16 and 256-color lookup tables, with `xterm`’s color palette used by default.
 
 [0.1.0-beta.0]: https://github.com/iddey/dumo/releases/tag/v0.1.0-beta.0
+[0.1.0-beta.1]: https://github.com/iddey/dumo/releases/tag/v0.1.0-beta.1
