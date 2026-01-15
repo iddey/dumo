@@ -15,7 +15,6 @@ use embedded_graphics::pixelcolor::{PixelColor, Rgb888};
 use embedded_graphics::primitives::Rectangle;
 use embedded_graphics::text::renderer::TextRenderer;
 use embedded_graphics::text::{Baseline, DecorationColor};
-use embedded_graphics::transform::Transform;
 use mplusfonts::BitmapFont;
 use mplusfonts::color::{Invert, Screen, WeightedAvg};
 use mplusfonts::style::BitmapFontStyle;
@@ -245,14 +244,13 @@ where
             let explicit_width = pixels.ok_or(InvalidSize)?;
             let size = Size::new(explicit_width, renderer.line_height());
             let clip_area = Rectangle { top_left, size };
+            let mut adapter = self.target.clipped(&clip_area);
 
             let metrics = renderer.measure_string(text, top_left, BASELINE);
             let pixels = metrics.next_position.x.saturating_sub(top_left.x);
             let inherent_width = pixels.try_into().unwrap_or_default();
             let crop_area = clip_area.resized_width(inherent_width, self.anchor_x);
-
-            let mut adapter = self.target.cropped(&crop_area);
-            let mut adapter = adapter.clipped(&clip_area.translate(-crop_area.top_left));
+            let mut adapter = adapter.translated(crop_area.top_left);
 
             let is_bold = cell.modifier.intersects(Modifier::BOLD);
             if is_bold && let Some(font_bold) = self.font_bold {
