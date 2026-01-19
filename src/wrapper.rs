@@ -13,6 +13,7 @@ use embedded_graphics::pixelcolor::{PixelColor, Rgb888};
 use mplusfonts::BitmapFont;
 use mplusfonts::color::{Invert, Screen, WeightedAvg};
 use ratatui_core::backend::Backend;
+use ratatui_core::buffer::Cell;
 
 use crate::backend::{ConfigureBackend, DrawTargetBackend};
 use crate::color::Palette;
@@ -44,10 +45,17 @@ where
     B: DrawTargetBackend<D, Error = Error<D::Error>>,
     D: DrawTarget,
     D::Error: Debug,
-    W: Wrapper<Inner = B> + Backend,
+    W: Wrapper<Inner = B> + Backend<Error = Error<D::Error>>,
 {
     fn call(&mut self, f: impl FnMut(&mut D) -> Result<(), D::Error>) -> Result<(), D::Error> {
         self.inner_mut().call(f)
+    }
+
+    fn draw_hidden<'z, I>(&mut self, content: I) -> Result<(), Self::Error>
+    where
+        I: Iterator<Item = (u16, u16, &'z Cell)>,
+    {
+        self.inner_mut().draw_hidden(content)
     }
 }
 

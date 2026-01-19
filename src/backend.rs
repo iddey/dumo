@@ -65,11 +65,20 @@ where
 /// Backend with a reference to a draw target.
 ///
 /// A backend or backend wrapper that implements this trait is able to call functions that expect a
-/// reference with exclusive access to a draw target as an argument.
+/// reference with exclusive access to a draw target as an argument, and it offers extended drawing
+/// capabilities that are required by wrappers in order to perform their tasks.
 pub trait DrawTargetBackend<D: DrawTarget>: Backend {
     /// Invokes the specified function item, which gets to access the draw target in the scope of a
     /// function call.
     fn call(&mut self, f: impl FnMut(&mut D) -> Result<(), D::Error>) -> Result<(), D::Error>;
+
+    /// Draws the specified content as if [`HIDDEN`](ratatui_core::style::Modifier::HIDDEN) was set
+    /// on all of the items, which is equivalent to using the background colors — or the foreground
+    /// colors if [`REVERSED`](ratatui_core::style::Modifier::REVERSED) is set — to clear the cells
+    /// that each of the characters or character clusters spans.
+    fn draw_hidden<'z, I>(&mut self, content: I) -> Result<(), Self::Error>
+    where
+        I: Iterator<Item = (u16, u16, &'z Cell)>;
 }
 
 /// Backend configuration retrieval and modification.
@@ -207,6 +216,19 @@ where
                 [text_color, background_color]
             };
 
+            let is_dim = cell.modifier.intersects(Modifier::DIM);
+            let text_color = if is_dim {
+                text_color.weighted_avg(
+                    background_color,
+                    background_color,
+                    text_color,
+                    text_color,
+                    background_color,
+                )
+            } else {
+                text_color
+            };
+
             let is_underlined = cell.modifier.intersects(Modifier::UNDERLINED);
             let underline_color = if is_underlined {
                 cell.underline_color
@@ -246,40 +268,47 @@ where
             let clip_area = Rectangle { top_left, size };
             let mut adapter = self.target.clipped(&clip_area);
 
-            let metrics = renderer.measure_string(text, top_left, BASELINE);
-            let pixels = metrics.next_position.x.saturating_sub(top_left.x);
-            let inherent_width = pixels.try_into().unwrap_or_default();
-            let crop_area = clip_area.resized_width(inherent_width, self.anchor_x);
-            let mut adapter = adapter.translated(crop_area.top_left);
-
-            let is_bold = cell.modifier.intersects(Modifier::BOLD);
-            if is_bold && let Some(font_bold) = self.font_bold {
-                renderer.font = font_bold;
-                renderer
-                    .draw_string(text, Point::zero(), BASELINE, &mut adapter)
+            let is_hidden = cell.modifier.intersects(Modifier::HIDDEN);
+            if is_hidden {
+                self.target
+                    .fill_solid(&clip_area, background_color)
                     .map_err(Error::Draw)?;
-
-                let metrics = renderer.measure_string(text, crop_area.top_left, BASELINE);
-                let left = clip_area.left_of(&metrics.bounding_box);
-                let right = clip_area.indent_to(metrics.next_position.x);
-                let middle = clip_area.left_of(&right).right_of(&left);
-                let below = middle.below(&metrics.bounding_box);
-                for area in [left, right, below] {
-                    self.target
-                        .fill_solid(&area, background_color)
-                        .map_err(Error::Draw)?;
-                }
             } else {
-                renderer
-                    .draw_string(text, Point::zero(), BASELINE, &mut adapter)
-                    .map_err(Error::Draw)?;
+                let metrics = renderer.measure_string(text, top_left, BASELINE);
+                let pixels = metrics.next_position.x.saturating_sub(top_left.x);
+                let inherent_width = pixels.try_into().unwrap_or_default();
+                let crop_area = clip_area.resized_width(inherent_width, self.anchor_x);
+                let mut adapter = adapter.translated(crop_area.top_left);
 
-                let left = clip_area.left_of(&crop_area);
-                let right = clip_area.right_of(&crop_area);
-                for area in [left, right] {
-                    self.target
-                        .fill_solid(&area, background_color)
+                let is_bold = cell.modifier.intersects(Modifier::BOLD);
+                if is_bold && let Some(font_bold) = self.font_bold {
+                    renderer.font = font_bold;
+                    renderer
+                        .draw_string(text, Point::zero(), BASELINE, &mut adapter)
                         .map_err(Error::Draw)?;
+
+                    let metrics = renderer.measure_string(text, crop_area.top_left, BASELINE);
+                    let left = clip_area.left_of(&metrics.bounding_box);
+                    let right = clip_area.indent_to(metrics.next_position.x);
+                    let middle = clip_area.left_of(&right).right_of(&left);
+                    let below = middle.below(&metrics.bounding_box);
+                    for area in [left, right, below] {
+                        self.target
+                            .fill_solid(&area, background_color)
+                            .map_err(Error::Draw)?;
+                    }
+                } else {
+                    renderer
+                        .draw_string(text, Point::zero(), BASELINE, &mut adapter)
+                        .map_err(Error::Draw)?;
+
+                    let left = clip_area.left_of(&crop_area);
+                    let right = clip_area.right_of(&crop_area);
+                    for area in [left, right] {
+                        self.target
+                            .fill_solid(&area, background_color)
+                            .map_err(Error::Draw)?;
+                    }
                 }
             }
         }
@@ -396,6 +425,53 @@ where
 {
     fn call(&mut self, mut f: impl FnMut(&mut D) -> Result<(), D::Error>) -> Result<(), D::Error> {
         f(self.target)
+    }
+
+    fn draw_hidden<'z, I>(&mut self, content: I) -> Result<(), Self::Error>
+    where
+        I: Iterator<Item = (u16, u16, &'z Cell)>,
+    {
+        use MeasureError::*;
+        use embedded_graphics::geometry::Size;
+        use unicode_width::UnicodeWidthStr;
+
+        const ORIGIN: Point = Point::zero();
+
+        let cell_size = self.font.cell_size();
+        for (x, y, cell) in content {
+            let text_color = cell.fg.map_with(self.palette).or(self.fg_reset);
+            let text_color = text_color.unwrap_or(D::Color::default().invert());
+            let background_color = cell.bg.map_with(self.palette).or(self.bg_reset);
+            let background_color = background_color.unwrap_or_default();
+            let is_reversed = cell.modifier.intersects(Modifier::REVERSED);
+            let background_color = if is_reversed {
+                text_color
+            } else {
+                background_color
+            };
+
+            let text = cell.symbol();
+
+            let columns_rows = [x, y].map(Into::into).into();
+            let pixels = cell_size.checked_component_mul(columns_rows);
+            let [x_offset, y_offset] = pixels.ok_or(InvalidSize)?.into();
+            let top_left = Point {
+                x: ORIGIN.x.saturating_add_unsigned(x_offset),
+                y: ORIGIN.y.saturating_add_unsigned(y_offset),
+            };
+
+            let columns = text.width().try_into().unwrap_or(u32::MAX);
+            let pixels = cell_size.width.checked_mul(columns);
+            let explicit_width = pixels.ok_or(InvalidSize)?;
+            let size = Size::new(explicit_width, self.font.metrics.line_height());
+            let fill_area = Rectangle { top_left, size };
+
+            self.target
+                .fill_solid(&fill_area, background_color)
+                .map_err(Error::Draw)?;
+        }
+
+        Ok(())
     }
 }
 

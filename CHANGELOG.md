@@ -7,6 +7,11 @@
 - Underline and strikethrough decorations being cut off before the edge of the cell when the style
   of the text is set to bold and the set of glyph images don’t close the gap to the next cell.
 
+### Changed
+
+- Dim and hidden modifiers now have the effect of rendering pixels at 50% and 0%, respectively, of
+  their values. Extended the drawing capabilities of backends to this effect.
+
 ## [0.1.0-beta.1] - 2026-01-15
 
 ### Added
