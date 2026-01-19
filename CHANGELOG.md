@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+
+- Underline and strikethrough decorations being cut off before the edge of the cell when the style
+  of the text is set to bold and the set of glyph images don’t close the gap to the next cell.
+
 ## [0.1.0-beta.1] - 2026-01-15
 
 ### Added

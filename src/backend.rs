@@ -261,7 +261,7 @@ where
 
                 let metrics = renderer.measure_string(text, crop_area.top_left, BASELINE);
                 let left = clip_area.left_of(&metrics.bounding_box);
-                let right = clip_area.right_of(&metrics.bounding_box);
+                let right = clip_area.indent_to(metrics.next_position.x);
                 let middle = clip_area.left_of(&right).right_of(&left);
                 let below = middle.below(&metrics.bounding_box);
                 for area in [left, right, below] {
