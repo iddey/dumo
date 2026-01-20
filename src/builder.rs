@@ -3,17 +3,27 @@ use core::mem::MaybeUninit;
 
 use embedded_graphics::pixelcolor::PixelColor;
 
+/// Builder for a palette for looking up colors of type `T`, where `T` is the color associated with
+/// the draw target for the backend.
+///
+/// The methods of this type provide a fluent-style interface for building 256-color lookup tables,
+/// which are intended to be used for creating [`Ansi256`](crate::color::Palette::Ansi256) palettes
+/// without having to keep track of whether a given subset of colors have been initialized.
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct PaletteBuilder<T: PixelColor, const N: usize>([T; N]);
 
 impl<T: PixelColor> PaletteBuilder<T, 0> {
+    /// Creates a new, empty builder with an empty array of colors having type `T`.
     pub const fn new() -> Self {
         Self([])
     }
 }
 
 impl<T: PixelColor> PaletteBuilder<T, 256> {
+    /// Consumes the builder, returning the array of colors having type `T`.
+    ///
+    /// This method is only available after all 256 colors have been added.
     pub const fn build(self) -> [T; 256] {
         self.0
     }
@@ -27,6 +37,9 @@ macro_rules! impl_add {
     ) => {
         $(
             impl<T: PixelColor> PaletteBuilder<T, $array_length> {
+                /// Adds a number of colors, inserting them at the expected position in a new array
+                /// where the colors that have previously been added are also moved.
+                #[must_use = "method copies new and any existing colors to a new array"]
                 pub const fn $fn_ident(
                     self,
                     colors: &[T; $n - $array_length]

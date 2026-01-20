@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Added
+
+- Support for terminal-style blinking animation using modifiers. Requires the new `alloc` feature
+  to remain enabled; otherwise, the wrapper that does the animation is not available. The wrapper
+  is configured using the `with_blink` method, and it can be called before or after `with_flush`.
+
 ### Fixed
 
 - Underline and strikethrough decorations being cut off before the edge of the cell when the style

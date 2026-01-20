@@ -1,6 +1,7 @@
 #[macro_use]
 mod wrap;
 
+pub mod blink;
 pub mod flush;
 
 use core::fmt::Debug;

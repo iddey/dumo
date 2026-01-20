@@ -27,6 +27,8 @@ use crate::color::{MapWith, Palette, Palettes};
 use crate::error::{Error, GetCursorError, MeasureError, SetCursorError};
 
 pub use crate::wrapper::Wrapper;
+#[cfg(feature = "alloc")]
+pub use crate::wrapper::blink::BlinkWrapper;
 pub use crate::wrapper::flush::FlushWrapper;
 
 /// Backend for Ratatui that renders to a display with the [`embedded-graphics`](embedded_graphics)

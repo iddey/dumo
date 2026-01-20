@@ -28,4 +28,10 @@ chrono = { version = "0.4", features = ["clock"] }
 tui-big-text = "0.8.1"
 
 [features]
+default = ["alloc"]
+
+# Enables the backend wrapper that buffers and redraws text that should blink.
+alloc = ["defmt/alloc"]
+
+# Allows the types in this crate and its dependencies to be formatted via defmt.
 defmt = ["dep:defmt", "embedded-graphics/defmt", "mplusfonts/defmt"]

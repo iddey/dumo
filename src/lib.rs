@@ -5,6 +5,9 @@
 #![warn(missing_debug_implementations)]
 #![warn(missing_copy_implementations)]
 
+#[cfg(feature = "alloc")]
+extern crate alloc;
+
 mod backend;
 mod builder;
 mod palette;
