@@ -211,12 +211,6 @@ where
             let text_color = text_color.unwrap_or(D::Color::default().invert());
             let background_color = cell.bg.map_with(self.palette).or(self.bg_reset);
             let background_color = background_color.unwrap_or_default();
-            let is_reversed = cell.modifier.intersects(Modifier::REVERSED);
-            let [text_color, background_color] = if is_reversed {
-                [background_color, text_color]
-            } else {
-                [text_color, background_color]
-            };
 
             let is_dim = cell.modifier.intersects(Modifier::DIM);
             let text_color = if is_dim {
@@ -229,6 +223,13 @@ where
                 )
             } else {
                 text_color
+            };
+
+            let is_reversed = cell.modifier.intersects(Modifier::REVERSED);
+            let [text_color, background_color] = if is_reversed {
+                [background_color, text_color]
+            } else {
+                [text_color, background_color]
             };
 
             let is_underlined = cell.modifier.intersects(Modifier::UNDERLINED);
@@ -445,6 +446,20 @@ where
             let text_color = text_color.unwrap_or(D::Color::default().invert());
             let background_color = cell.bg.map_with(self.palette).or(self.bg_reset);
             let background_color = background_color.unwrap_or_default();
+
+            let is_dim = cell.modifier.intersects(Modifier::DIM);
+            let text_color = if is_dim {
+                text_color.weighted_avg(
+                    background_color,
+                    background_color,
+                    text_color,
+                    text_color,
+                    background_color,
+                )
+            } else {
+                text_color
+            };
+
             let is_reversed = cell.modifier.intersects(Modifier::REVERSED);
             let background_color = if is_reversed {
                 text_color
