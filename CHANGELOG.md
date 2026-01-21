@@ -7,6 +7,7 @@
 - Support for terminal-style blinking animation using modifiers. Requires the new `alloc` feature
   to remain enabled; otherwise, the wrapper that does the animation is not available. The wrapper
   is configured using the `with_blink` method, and it can be called before or after `with_flush`.
+- Third example that uses `embedded-graphics-simulator`: style modifiers, demonstrating blinking.
 
 ### Fixed
 

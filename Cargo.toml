@@ -35,3 +35,7 @@ alloc = ["defmt/alloc"]
 
 # Allows the types in this crate and its dependencies to be formatted via defmt.
 defmt = ["dep:defmt", "embedded-graphics/defmt", "mplusfonts/defmt"]
+
+[[example]]
+name = "styles-1"
+required-features = ["alloc"]

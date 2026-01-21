@@ -53,3 +53,28 @@ only render the full block character at a size of 6×16 pixels to fill an area o
 </picture>
 
 [`Palettes`]: https://docs.rs/dumo/latest/dumo/color/trait.Palettes.html
+
+## Style modifiers
+
+Usage: `cargo run --example styles-1`
+
+### Instructions
+
+* Press `DOWN` or `J` or `TAB` to select the next modifier
+* Press `UP` or `K` or `SHIFT` + `TAB` to select the previous modifier
+* Press `SPACE` or `RETURN` to toggle the selected modifier on and off
+* Press `ESC` to quit
+
+The effects demonstrated in this example — except for *`ITALIC`*, which lacks support and is absent
+ — are all possible terminal-style [`Modifier`] flags that are available through Ratatui with Dumo,
+also with varying levels of support elsewhere: <https://ratatui.rs/examples/style/modifiers/>
+
+Modifiers can be added to and removed from the styled sample text, showing how composition of these
+effects work; however, it requires running the example.
+
+[`Modifier`]: https://docs.rs/ratatui/latest/ratatui/style/struct.Modifier.html
+
+<picture>
+    <source srcset="../assets/style-modifiers.webp" type="image/webp" width="480" height="480" />
+    <img src="../assets/style-modifiers.gif" alt="palettes" width="480" height="480" />
+</picture>
