@@ -10,6 +10,8 @@ use mplusfonts::style::BitmapFontStyle;
 
 use crate::backend::DumoBackend;
 #[cfg(feature = "alloc")]
+use crate::blink::Blink;
+#[cfg(feature = "alloc")]
 use crate::wrapper::blink::BlinkWrapper;
 use crate::wrapper::flush::FlushWrapper;
 
@@ -18,22 +20,18 @@ macro_rules! impl_with_blink {
     () => {
         /// Returns the backend with a new wrapper around it, redrawing cells to show and hide text
         /// that should blink. Every time a [`Terminal`] calls the [`Backend::draw`] method as part
-        /// of the rendering process, the wrapper advances the blinking animation by one frame. The
-        /// `long_period` and `short_period` parameters apply to [`SLOW_BLINK`] and [`RAPID_BLINK`]
-        /// modifiers, respectively, where the number of frames in an animation cycle is specified.
+        /// of the rendering process, the wrapper advances the blinking animation by one frame.
         ///
         /// Backends without this wrapper display text that is set to blink as solid text.
         ///
         /// [`Backend::draw`]: ratatui_core::backend::Backend::draw
         /// [`Terminal`]: ratatui_core::terminal::Terminal
-        /// [`SLOW_BLINK`]: ratatui_core::style::Modifier::SLOW_BLINK
-        /// [`RAPID_BLINK`]: ratatui_core::style::Modifier::RAPID_BLINK
         pub const fn with_blink(
             self,
-            long_period: usize,
-            short_period: usize,
+            slow_blink: Blink,
+            rapid_blink: Blink,
         ) -> BlinkWrapper<Self, D> {
-            BlinkWrapper::new(self, long_period, short_period)
+            BlinkWrapper::new(self, slow_blink, rapid_blink)
         }
     };
 }

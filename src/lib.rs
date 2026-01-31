@@ -2,6 +2,7 @@
 //! this crate is compatible with `no_std` and is still work-in-progress.
 
 #![no_std]
+#![warn(missing_docs)]
 #![warn(missing_debug_implementations)]
 #![warn(missing_copy_implementations)]
 
@@ -13,6 +14,7 @@ mod builder;
 mod palette;
 mod wrapper;
 
+pub mod blink;
 pub mod color;
 pub mod error;
 

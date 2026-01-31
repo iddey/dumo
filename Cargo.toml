@@ -1,6 +1,6 @@
 [package]
 name = "dumo"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 edition = "2024"
 description = "An embedded-graphics backend for Ratatui with an adjustable font size"
 documentation = "https://docs.rs/dumo"

@@ -4,6 +4,7 @@ use std::thread;
 use std::time::Duration;
 
 use dumo::DumoBackend;
+use dumo::blink::Blink;
 use dumo::error::Error;
 use embedded_graphics::geometry::AnchorX;
 use embedded_graphics::pixelcolor::Rgb565;
@@ -48,7 +49,7 @@ pub fn main() -> Result<(), Error<Infallible>> {
     backend.fg_reset = Some(Rgb565::new(30, 60, 30));
     backend.anchor_x = AnchorX::Right;
 
-    let backend = backend.with_blink(16, 8);
+    let backend = backend.with_blink(Blink::with_period(16), Blink::with_period(8));
     let backend = backend.with_flush(|display| {
         window.update(display);
 

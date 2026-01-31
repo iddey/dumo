@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [0.1.0-beta.2] - 2026-01-31
 
 ### Added
 
@@ -49,3 +49,4 @@
 
 [0.1.0-beta.0]: https://github.com/iddey/dumo/releases/tag/v0.1.0-beta.0
 [0.1.0-beta.1]: https://github.com/iddey/dumo/releases/tag/v0.1.0-beta.1
+[0.1.0-beta.2]: https://github.com/iddey/dumo/releases/tag/v0.1.0-beta.2

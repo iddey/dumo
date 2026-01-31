@@ -10,6 +10,8 @@ use mplusfonts::style::BitmapFontStyle;
 
 use crate::backend::DumoBackend;
 #[cfg(feature = "alloc")]
+use crate::blink::Blink;
+#[cfg(feature = "alloc")]
 use crate::wrapper::blink::BlinkWrapper;
 use crate::wrapper::flush::FlushWrapper;
 
