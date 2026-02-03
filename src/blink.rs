@@ -32,10 +32,14 @@ impl Blink {
     pub const fn get(&self, index: usize) -> Blinked {
         match *self {
             Self::Repeat(delay, blink) => {
-                if let Some(index) = index.checked_rem(delay + blink) {
-                    Blinked(index >= delay)
+                if let Some(period) = delay.checked_add(blink) {
+                    if let Some(index) = index.checked_rem(period) {
+                        Blinked(index >= delay)
+                    } else {
+                        Blinked(true)
+                    }
                 } else {
-                    Blinked(true)
+                    Blinked(index >= delay)
                 }
             }
         }
