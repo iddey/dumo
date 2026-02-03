@@ -28,9 +28,6 @@ pub enum Error<T> {
     /// Error that is related to the size of the bitmap font or the text area.
     #[error(transparent)]
     Measure(#[from] MeasureError),
-    /// Error that is related to the position of the cursor in the text area.
-    #[error(transparent)]
-    GetCursor(#[from] GetCursorError),
     /// Error that occurred while changing the position of the cursor.
     #[error(transparent)]
     SetCursor(#[from] SetCursorError),
@@ -48,16 +45,6 @@ pub enum MeasureError {
     /// The size has numeric components that are too large.
     #[error("unable to convert size")]
     TryFromSize(TryFromIntError),
-}
-
-/// Error that occurs while retrieving the position of the cursor, indicating an invalid backend
-/// configuration.
-#[derive(Error, Debug, Clone, Copy)]
-#[cfg_attr(feature = "defmt", derive(defmt::Format))]
-pub enum GetCursorError {
-    /// The position has numeric components that are too large.
-    #[error("unable to convert point")]
-    TryFromPoint(TryFromIntError),
 }
 
 /// Error that occurs when attempting to set the cursor to an invalid position in the text area.

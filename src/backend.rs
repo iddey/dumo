@@ -24,7 +24,7 @@ use ratatui_core::layout::{Position, Size};
 use ratatui_core::style::Modifier;
 
 use crate::color::{MapWith, Palette, Palettes};
-use crate::error::{Error, GetCursorError, MeasureError, SetCursorError};
+use crate::error::{Error, MeasureError, SetCursorError};
 
 pub use crate::wrapper::Wrapper;
 #[cfg(feature = "alloc")]
@@ -328,12 +328,7 @@ where
     }
 
     fn get_cursor_position(&mut self) -> Result<Position, Self::Error> {
-        use GetCursorError::*;
-
-        let [x, y] = Point::zero().into();
-        let [x, y] = [x, y].map(|index| index.try_into().map_err(TryFromPoint));
-
-        let columns_rows = Position::new(x?, y?);
+        let columns_rows = Position::ORIGIN;
 
         Ok(columns_rows)
     }
@@ -346,7 +341,7 @@ where
         let [columns, rows] = [columns_rows.width, columns_rows.height];
 
         let _ = (position.x < columns && position.y < rows)
-            .then_some(Point::new(position.x.into(), position.y.into()))
+            .then_some(position)
             .ok_or(InvalidPosition)?;
 
         Ok(())
