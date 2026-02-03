@@ -272,7 +272,7 @@ where
             let mut adapter = self.target.clipped(&clip_area);
 
             let is_hidden = cell.modifier.intersects(Modifier::HIDDEN);
-            if is_hidden {
+            if is_hidden || text.chars().all(|char| char::is_ascii_whitespace(&char)) {
                 self.target
                     .fill_solid(&clip_area, background_color)
                     .map_err(Error::Draw)?;
