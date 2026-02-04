@@ -39,21 +39,16 @@ pub trait Wrapper {
     fn into_inner(self) -> Self::Inner;
 }
 
-pub trait DrawTargetBackendWrapper<B, D>: Wrapper<Inner = B> + Backend<Error = B::Error>
-where
-    B: DrawTargetBackend<D, Error = Error<D::Error>>,
-    D: DrawTarget,
-    D::Error: Debug,
-{
-}
+/// Marker for blanket implementations.
+trait WrapTrait<T>: Wrapper {}
 
-pub trait ConfigureBackendWrapper<'a, 'b, 'c, B, T, C>: Wrapper<Inner = B>
-where
-    B: ConfigureBackend<'a, 'b, 'c, T, C>,
-    C: PixelColor + From<C::Raw>,
-    T: PixelColor + Default + Invert + Screen + WeightedAvg + From<Rgb888>,
-    RawDataSlice<'a, C::Raw, BigEndian>: IntoIterator<Item = C::Raw>,
-{
+mod traits {
+    #[derive(Debug, Clone, Copy)]
+    pub struct DrawTargetBackend;
+    #[derive(Debug, Clone, Copy)]
+    pub struct ConfigureBackend;
+    #[derive(Debug, Clone, Copy)]
+    pub struct ConfigureBlinkWrapper;
 }
 
 impl<W, B, D> DrawTargetBackend<D> for W
@@ -61,7 +56,7 @@ where
     B: DrawTargetBackend<D, Error = Error<D::Error>>,
     D: DrawTarget,
     D::Error: Debug,
-    W: DrawTargetBackendWrapper<B, D, Inner = B>,
+    W: WrapTrait<traits::DrawTargetBackend, Inner = B> + Backend<Error = B::Error>,
 {
     fn call(&mut self, f: impl FnMut(&mut D) -> Result<(), D::Error>) -> Result<(), D::Error> {
         self.inner_mut().call(f)
@@ -80,7 +75,7 @@ where
     B: ConfigureBackend<'a, 'b, 'c, T, C>,
     C: PixelColor + From<C::Raw>,
     T: PixelColor + Default + Invert + Screen + WeightedAvg + From<Rgb888>,
-    W: ConfigureBackendWrapper<'a, 'b, 'c, B, T, C, Inner = B>,
+    W: WrapTrait<traits::ConfigureBackend, Inner = B>,
     RawDataSlice<'a, C::Raw, BigEndian>: IntoIterator<Item = C::Raw>,
 {
     fn font(&self) -> &'b BitmapFont<'a, C, 1> {

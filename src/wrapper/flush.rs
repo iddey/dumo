@@ -4,23 +4,15 @@ use core::fmt::Debug;
 use core::marker::PhantomData;
 
 use embedded_graphics::draw_target::DrawTarget;
-use embedded_graphics::iterator::raw::RawDataSlice;
-use embedded_graphics::pixelcolor::raw::BigEndian;
-use embedded_graphics::pixelcolor::{PixelColor, Rgb888};
-use mplusfonts::color::{Invert, Screen, WeightedAvg};
 use ratatui_core::backend::{Backend, ClearType, WindowSize};
 use ratatui_core::buffer::Cell;
 use ratatui_core::layout::{Position, Size};
 
-use crate::backend::{ConfigureBackend, DrawTargetBackend};
-#[cfg(feature = "alloc")]
-use crate::blink::Blink;
+use crate::backend::DrawTargetBackend;
 use crate::error::Error;
-#[cfg(feature = "alloc")]
-use crate::wrapper::blink::ConfigureBlinkWrapper;
-use crate::wrapper::{ConfigureBackendWrapper, DrawTargetBackendWrapper};
 
-use super::Wrapper;
+use super::traits;
+use super::{WrapTrait, Wrapper};
 
 /// Wrapper with a function item for backends to call, flushing the changes made to the draw target
 /// on request, which is needed for certain display device drivers.
@@ -132,7 +124,7 @@ where
     }
 }
 
-impl<B, F, D> DrawTargetBackendWrapper<B, D> for FlushWrapper<B, F, D>
+impl<B, F, D> WrapTrait<traits::DrawTargetBackend> for FlushWrapper<B, F, D>
 where
     B: DrawTargetBackend<D, Error = Error<D::Error>>,
     D: DrawTarget,
@@ -141,40 +133,20 @@ where
 {
 }
 
-impl<'a, 'b, 'c, B, F, D, C> ConfigureBackendWrapper<'a, 'b, 'c, B, D::Color, C>
-    for FlushWrapper<B, F, D>
+impl<B, F, D> WrapTrait<traits::ConfigureBackend> for FlushWrapper<B, F, D>
 where
-    B: DrawTargetBackend<D, Error = Error<D::Error>> + ConfigureBackend<'a, 'b, 'c, D::Color, C>,
-    C: PixelColor + From<C::Raw>,
+    B: DrawTargetBackend<D, Error = Error<D::Error>>,
     D: DrawTarget,
-    D::Color: PixelColor + Default + Invert + Screen + WeightedAvg + From<Rgb888>,
     D::Error: Debug,
     F: FnMut(&mut D) -> Result<(), D::Error>,
-    RawDataSlice<'a, C::Raw, BigEndian>: IntoIterator<Item = C::Raw>,
 {
 }
 
-#[cfg(feature = "alloc")]
-impl<B, F, D> ConfigureBlinkWrapper for FlushWrapper<B, F, D>
+impl<B, F, D> WrapTrait<traits::ConfigureBlinkWrapper> for FlushWrapper<B, F, D>
 where
-    B: DrawTargetBackend<D, Error = Error<D::Error>> + ConfigureBlinkWrapper,
+    B: DrawTargetBackend<D, Error = Error<D::Error>>,
     D: DrawTarget,
     D::Error: Debug,
     F: FnMut(&mut D) -> Result<(), D::Error>,
 {
-    fn slow_blink(&self) -> Blink {
-        self.inner().slow_blink()
-    }
-
-    fn set_slow_blink(&mut self, slow_blink: Blink) {
-        self.inner_mut().set_slow_blink(slow_blink);
-    }
-
-    fn rapid_blink(&self) -> Blink {
-        self.inner().rapid_blink()
-    }
-
-    fn set_rapid_blink(&mut self, rapid_blink: Blink) {
-        self.inner_mut().set_rapid_blink(rapid_blink);
-    }
 }

@@ -11,21 +11,17 @@ use core::marker::PhantomData;
 use self::cache::CacheKey;
 use self::state::State;
 use embedded_graphics::draw_target::DrawTarget;
-use embedded_graphics::iterator::raw::RawDataSlice;
-use embedded_graphics::pixelcolor::raw::BigEndian;
-use embedded_graphics::pixelcolor::{PixelColor, Rgb888};
-use mplusfonts::color::{Invert, Screen, WeightedAvg};
 use ratatui_core::backend::{Backend, ClearType, WindowSize};
 use ratatui_core::buffer::Cell;
 use ratatui_core::layout::{Position, Size};
 use ratatui_core::style::Modifier;
 
-use crate::backend::{ConfigureBackend, DrawTargetBackend};
+use crate::backend::DrawTargetBackend;
 use crate::blink::{Blink, Blinked};
 use crate::error::Error;
-use crate::wrapper::{ConfigureBackendWrapper, DrawTargetBackendWrapper};
 
-use super::Wrapper;
+use super::traits;
+use super::{WrapTrait, Wrapper};
 
 /// Wrapper that is required in order for text that has [`slow_blink`] or [`rapid_blink`] modifiers
 /// added to its style, to appear to be blinking, driving the animation by redrawing cells that are
@@ -189,6 +185,29 @@ where
     }
 }
 
+impl<B, D> ConfigureBlinkWrapper for BlinkWrapper<B, D>
+where
+    B: DrawTargetBackend<D, Error = Error<D::Error>>,
+    D: DrawTarget,
+    D::Error: Debug,
+{
+    fn slow_blink(&self) -> Blink {
+        self.slow_blink
+    }
+
+    fn set_slow_blink(&mut self, slow_blink: Blink) {
+        self.slow_blink = slow_blink;
+    }
+
+    fn rapid_blink(&self) -> Blink {
+        self.rapid_blink
+    }
+
+    fn set_rapid_blink(&mut self, rapid_blink: Blink) {
+        self.rapid_blink = rapid_blink;
+    }
+}
+
 impl<B, D> Wrapper for BlinkWrapper<B, D>
 where
     B: DrawTargetBackend<D, Error = Error<D::Error>>,
@@ -210,7 +229,7 @@ where
     }
 }
 
-impl<B, D> DrawTargetBackendWrapper<B, D> for BlinkWrapper<B, D>
+impl<B, D> WrapTrait<traits::DrawTargetBackend> for BlinkWrapper<B, D>
 where
     B: DrawTargetBackend<D, Error = Error<D::Error>>,
     D: DrawTarget,
@@ -218,36 +237,32 @@ where
 {
 }
 
-impl<'a, 'b, 'c, B, D, C> ConfigureBackendWrapper<'a, 'b, 'c, B, D::Color, C> for BlinkWrapper<B, D>
-where
-    B: DrawTargetBackend<D, Error = Error<D::Error>> + ConfigureBackend<'a, 'b, 'c, D::Color, C>,
-    C: PixelColor + From<C::Raw>,
-    D: DrawTarget,
-    D::Color: PixelColor + Default + Invert + Screen + WeightedAvg + From<Rgb888>,
-    D::Error: Debug,
-    RawDataSlice<'a, C::Raw, BigEndian>: IntoIterator<Item = C::Raw>,
-{
-}
-
-impl<B, D> ConfigureBlinkWrapper for BlinkWrapper<B, D>
+impl<B, D> WrapTrait<traits::ConfigureBackend> for BlinkWrapper<B, D>
 where
     B: DrawTargetBackend<D, Error = Error<D::Error>>,
     D: DrawTarget,
     D::Error: Debug,
+{
+}
+
+impl<W, B> ConfigureBlinkWrapper for W
+where
+    B: ConfigureBlinkWrapper,
+    W: WrapTrait<traits::ConfigureBlinkWrapper, Inner = B>,
 {
     fn slow_blink(&self) -> Blink {
-        self.slow_blink
+        self.inner().slow_blink()
     }
 
     fn set_slow_blink(&mut self, slow_blink: Blink) {
-        self.slow_blink = slow_blink;
+        self.inner_mut().set_slow_blink(slow_blink);
     }
 
     fn rapid_blink(&self) -> Blink {
-        self.rapid_blink
+        self.inner().rapid_blink()
     }
 
     fn set_rapid_blink(&mut self, rapid_blink: Blink) {
-        self.rapid_blink = rapid_blink;
+        self.inner_mut().set_rapid_blink(rapid_blink);
     }
 }
