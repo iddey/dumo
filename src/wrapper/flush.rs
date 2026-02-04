@@ -4,12 +4,17 @@ use core::fmt::Debug;
 use core::marker::PhantomData;
 
 use embedded_graphics::draw_target::DrawTarget;
+use embedded_graphics::iterator::raw::RawDataSlice;
+use embedded_graphics::pixelcolor::raw::BigEndian;
+use embedded_graphics::pixelcolor::{PixelColor, Rgb888};
+use mplusfonts::color::{Invert, Screen, WeightedAvg};
 use ratatui_core::backend::{Backend, ClearType, WindowSize};
 use ratatui_core::buffer::Cell;
 use ratatui_core::layout::{Position, Size};
 
-use crate::backend::DrawTargetBackend;
+use crate::backend::{ConfigureBackend, DrawTargetBackend};
 use crate::error::Error;
+use crate::wrapper::{ConfigureBackendWrapper, DrawTargetBackendWrapper};
 
 use super::Wrapper;
 
@@ -101,7 +106,6 @@ where
     }
 }
 
-/// Wrapper around a backend or another backend wrapper.
 impl<B, F, D> Wrapper for FlushWrapper<B, F, D>
 where
     B: DrawTargetBackend<D, Error = Error<D::Error>>,
@@ -122,4 +126,26 @@ where
     fn into_inner(self) -> Self::Inner {
         self.backend
     }
+}
+
+impl<B, F, D> DrawTargetBackendWrapper<B, D> for FlushWrapper<B, F, D>
+where
+    B: DrawTargetBackend<D, Error = Error<D::Error>>,
+    D: DrawTarget,
+    D::Error: Debug,
+    F: FnMut(&mut D) -> Result<(), D::Error>,
+{
+}
+
+impl<'a, 'b, 'c, B, F, D, C> ConfigureBackendWrapper<'a, 'b, 'c, B, D::Color, C>
+    for FlushWrapper<B, F, D>
+where
+    B: DrawTargetBackend<D, Error = Error<D::Error>> + ConfigureBackend<'a, 'b, 'c, D::Color, C>,
+    C: PixelColor + From<C::Raw>,
+    D: DrawTarget,
+    D::Color: PixelColor + Default + Invert + Screen + WeightedAvg + From<Rgb888>,
+    D::Error: Debug,
+    F: FnMut(&mut D) -> Result<(), D::Error>,
+    RawDataSlice<'a, C::Raw, BigEndian>: IntoIterator<Item = C::Raw>,
+{
 }
