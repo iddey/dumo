@@ -48,6 +48,24 @@ where
     phantom: PhantomData<D>,
 }
 
+/// Backend configuration retrieval and modification of the [`BlinkWrapper`] layer.
+///
+/// A backend wrapper that implements this trait allows the fields of a [`BlinkWrapper`] that are
+/// configurable to have their values read or have new values assigned.
+pub trait ConfigureBlinkWrapper {
+    /// Returns the blink animation cycle for slow blinking.
+    fn slow_blink(&self) -> Blink;
+
+    /// Sets the blink animation cycle for slow blinking.
+    fn set_slow_blink(&mut self, slow_blink: Blink);
+
+    /// Returns the blink animation cycle for rapid blinking.
+    fn rapid_blink(&self) -> Blink;
+
+    /// Sets the blink animation cycle for rapid blinking.
+    fn set_rapid_blink(&mut self, rapid_blink: Blink);
+}
+
 impl<B, D> BlinkWrapper<B, D>
 where
     B: DrawTargetBackend<D, Error = Error<D::Error>>,
@@ -209,4 +227,27 @@ where
     D::Error: Debug,
     RawDataSlice<'a, C::Raw, BigEndian>: IntoIterator<Item = C::Raw>,
 {
+}
+
+impl<B, D> ConfigureBlinkWrapper for BlinkWrapper<B, D>
+where
+    B: DrawTargetBackend<D, Error = Error<D::Error>>,
+    D: DrawTarget,
+    D::Error: Debug,
+{
+    fn slow_blink(&self) -> Blink {
+        self.slow_blink
+    }
+
+    fn set_slow_blink(&mut self, slow_blink: Blink) {
+        self.slow_blink = slow_blink;
+    }
+
+    fn rapid_blink(&self) -> Blink {
+        self.rapid_blink
+    }
+
+    fn set_rapid_blink(&mut self, rapid_blink: Blink) {
+        self.rapid_blink = rapid_blink;
+    }
 }

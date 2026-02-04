@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- Trait for configuring the slow and rapid blinking animation cycles.
+
 ## [0.1.0-beta.2] - 2026-01-31
 
 ### Added

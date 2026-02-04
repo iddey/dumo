@@ -13,7 +13,11 @@ use ratatui_core::buffer::Cell;
 use ratatui_core::layout::{Position, Size};
 
 use crate::backend::{ConfigureBackend, DrawTargetBackend};
+#[cfg(feature = "alloc")]
+use crate::blink::Blink;
 use crate::error::Error;
+#[cfg(feature = "alloc")]
+use crate::wrapper::blink::ConfigureBlinkWrapper;
 use crate::wrapper::{ConfigureBackendWrapper, DrawTargetBackendWrapper};
 
 use super::Wrapper;
@@ -148,4 +152,29 @@ where
     F: FnMut(&mut D) -> Result<(), D::Error>,
     RawDataSlice<'a, C::Raw, BigEndian>: IntoIterator<Item = C::Raw>,
 {
+}
+
+#[cfg(feature = "alloc")]
+impl<B, F, D> ConfigureBlinkWrapper for FlushWrapper<B, F, D>
+where
+    B: DrawTargetBackend<D, Error = Error<D::Error>> + ConfigureBlinkWrapper,
+    D: DrawTarget,
+    D::Error: Debug,
+    F: FnMut(&mut D) -> Result<(), D::Error>,
+{
+    fn slow_blink(&self) -> Blink {
+        self.inner().slow_blink()
+    }
+
+    fn set_slow_blink(&mut self, slow_blink: Blink) {
+        self.inner_mut().set_slow_blink(slow_blink);
+    }
+
+    fn rapid_blink(&self) -> Blink {
+        self.inner().rapid_blink()
+    }
+
+    fn set_rapid_blink(&mut self, rapid_blink: Blink) {
+        self.inner_mut().set_rapid_blink(rapid_blink);
+    }
 }
