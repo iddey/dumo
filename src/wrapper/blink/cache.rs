@@ -88,3 +88,9 @@ impl Cache {
         self.0.iter()
     }
 }
+
+impl Default for Cache {
+    fn default() -> Self {
+        Self::new()
+    }
+}
