@@ -70,3 +70,29 @@ where
     impl_with_blink!();
     impl_with_flush!();
 }
+
+macro_rules! impl_wrapper {
+    (
+        $wrapper_ident:ident
+        $([$wrapper_lifetime:lifetime])?
+        $(<$wrapper_type_param_ident:ident>)?
+        $(($impl_type_param_ident:ident: $($impl_type_param_bounds:tt)+))?,
+        $backend_type:ty
+        $([$impl_lifetime:lifetime])?,
+        $($impl_item:item)*
+    ) => {
+        impl<'a, 'b, $($impl_lifetime,)? $($impl_type_param_ident,)? D, C>
+            $wrapper_ident<$($wrapper_lifetime,)? $backend_type, $($wrapper_type_param_ident,)? D>
+        where
+            C: PixelColor + From<C::Raw>,
+            D: DrawTarget,
+            D::Color: PixelColor + Default + Invert + Screen + WeightedAvg + From<Rgb888>,
+            D::Error: Debug,
+            $($impl_type_param_ident: $($impl_type_param_bounds)+,)?
+            RawDataSlice<'a, C::Raw, BigEndian>: IntoIterator<Item = C::Raw>,
+            BitmapFontStyle<'a, 'b, D::Color, C, 1>: TextRenderer<Color = D::Color>,
+        {
+            $($impl_item)*
+        }
+    }
+}

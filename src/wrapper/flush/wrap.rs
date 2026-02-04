@@ -15,16 +15,9 @@ use crate::blink::Blink;
 use crate::wrapper::blink::BlinkWrapper;
 use crate::wrapper::flush::FlushWrapper;
 
-impl<'a, 'b, F, D, C> FlushWrapper<DumoBackend<'a, 'b, '_, '_, D, C>, F, D>
-where
-    C: PixelColor + From<C::Raw>,
-    D: DrawTarget,
-    D::Color: PixelColor + Default + Invert + Screen + WeightedAvg + From<Rgb888>,
-    D::Error: Debug,
-    F: FnMut(&mut D) -> Result<(), D::Error>,
-    RawDataSlice<'a, C::Raw, BigEndian>: IntoIterator<Item = C::Raw>,
-    BitmapFontStyle<'a, 'b, D::Color, C, 1>: TextRenderer<Color = D::Color>,
-{
+impl_wrapper!(
+    FlushWrapper<F>(F: FnMut(&mut D) -> Result<(), D::Error>),
+    DumoBackend<'a, 'b, '_, '_, D, C>,
     #[cfg(feature = "alloc")]
     impl_with_blink!();
-}
+);

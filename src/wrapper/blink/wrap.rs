@@ -13,14 +13,8 @@ use crate::backend::DumoBackend;
 use crate::wrapper::blink::BlinkWrapper;
 use crate::wrapper::flush::FlushWrapper;
 
-impl<'a, 'b, D, C> BlinkWrapper<DumoBackend<'a, 'b, '_, '_, D, C>, D>
-where
-    C: PixelColor + From<C::Raw>,
-    D: DrawTarget,
-    D::Color: PixelColor + Default + Invert + Screen + WeightedAvg + From<Rgb888>,
-    D::Error: Debug,
-    RawDataSlice<'a, C::Raw, BigEndian>: IntoIterator<Item = C::Raw>,
-    BitmapFontStyle<'a, 'b, D::Color, C, 1>: TextRenderer<Color = D::Color>,
-{
+impl_wrapper!(
+    BlinkWrapper,
+    DumoBackend<'a, 'b, '_, '_, D, C>,
     impl_with_flush!();
-}
+);
