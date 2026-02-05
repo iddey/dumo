@@ -56,7 +56,8 @@ where
     B: DrawTargetBackend<D, Error = Error<D::Error>>,
     D: DrawTarget,
     D::Error: Debug,
-    W: WrapTrait<traits::DrawTargetBackend, Inner = B> + Backend<Error = B::Error>,
+    W: Backend<Error = B::Error>,
+    W: WrapTrait<traits::DrawTargetBackend, Inner = B>,
 {
     fn call(&mut self, f: impl FnMut(&mut D) -> Result<(), D::Error>) -> Result<(), D::Error> {
         self.inner_mut().call(f)
