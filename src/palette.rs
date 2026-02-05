@@ -84,7 +84,7 @@ pub trait Palettes<'a>: PixelColor + 'a {
 
 trait GrayColorExt: GrayColor {
     const MAX_LUMA: u8 = 2u8
-        .wrapping_pow(<Self as PixelColor>::Raw::BITS_PER_PIXEL as u32)
+        .wrapping_pow(Self::Raw::BITS_PER_PIXEL as u32)
         .wrapping_sub(1);
 }
 
