@@ -10,7 +10,7 @@ use mplusfonts::style::BitmapFontStyle;
 
 use crate::backend::DumoBackend;
 #[cfg(feature = "alloc")]
-use crate::blink::Blink;
+use crate::blink::{Blink, ControlBlinking};
 #[cfg(feature = "alloc")]
 use crate::wrapper::blink::BlinkWrapper;
 use crate::wrapper::flush::FlushWrapper;
@@ -20,18 +20,17 @@ macro_rules! impl_with_blink {
     () => {
         /// Returns the backend with a new wrapper around it, redrawing cells to show and hide text
         /// that should blink. Every time a [`Terminal`] calls the [`Backend::draw`] method as part
-        /// of the rendering process, the wrapper advances the blinking animation by one frame.
+        /// of the rendering process, the wrapper advances the blinking animation by one frame. The
+        /// [`ControlBlinking`] trait also allows stepping the blinking animation.
         ///
         /// Backends without this wrapper display text that is set to blink as solid text.
         ///
         /// [`Backend::draw`]: ratatui_core::backend::Backend::draw
         /// [`Terminal`]: ratatui_core::terminal::Terminal
-        pub const fn with_blink(
-            self,
-            slow_blink: Blink,
-            rapid_blink: Blink,
-        ) -> BlinkWrapper<Self, D> {
-            BlinkWrapper::new(self, slow_blink, rapid_blink)
+        pub fn with_blink(self, slow_blink: Blink, rapid_blink: Blink) -> BlinkWrapper<Self, D> {
+            let mut wrapper = BlinkWrapper::new(self, slow_blink, rapid_blink);
+            wrapper.start_blinking();
+            wrapper
         }
     };
 }

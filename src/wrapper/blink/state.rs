@@ -5,6 +5,7 @@ use super::cache::Cache;
 pub struct State {
     pub cache: Cache,
     pub ticks: usize,
+    pub blinking: bool,
 }
 
 impl State {
@@ -12,6 +13,7 @@ impl State {
         Self {
             cache: Cache::new(),
             ticks: 0,
+            blinking: false,
         }
     }
 }

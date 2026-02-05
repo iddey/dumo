@@ -81,6 +81,11 @@ pub trait DrawTargetBackend<D: DrawTarget>: Backend {
     fn draw_hidden<'z, I>(&mut self, content: I) -> Result<(), Self::Error>
     where
         I: Iterator<Item = (u16, u16, &'z Cell)>;
+
+    /// Advances the blinking animation associated with the backend or backend wrapper if there are
+    /// such features, calling [`advance_blink_by`](DrawTargetBackend::advance_blink_by) afterwards
+    /// so that inner layers can do the same. The `ticks` are added to their internal frame counts.
+    fn advance_blink_by(&mut self, ticks: usize) -> Result<(), Self::Error>;
 }
 
 /// Backend configuration retrieval and modification.
@@ -483,6 +488,10 @@ where
                 .map_err(Error::Draw)?;
         }
 
+        Ok(())
+    }
+
+    fn advance_blink_by(&mut self, _: usize) -> Result<(), Self::Error> {
         Ok(())
     }
 }

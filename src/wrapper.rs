@@ -49,6 +49,8 @@ pub mod traits {
     pub struct ConfigureBackend;
     #[derive(Debug, Clone, Copy)]
     pub struct ConfigureBlinkWrapper;
+    #[derive(Debug, Clone, Copy)]
+    pub struct ControlBlinking;
 }
 
 impl<W, B, D> DrawTargetBackend<D> for W
@@ -68,6 +70,10 @@ where
         I: Iterator<Item = (u16, u16, &'z Cell)>,
     {
         self.inner_mut().draw_hidden(content)
+    }
+
+    fn advance_blink_by(&mut self, ticks: usize) -> Result<(), Self::Error> {
+        self.inner_mut().advance_blink_by(ticks)
     }
 }
 

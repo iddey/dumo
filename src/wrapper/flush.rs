@@ -150,3 +150,12 @@ where
     F: FnMut(&mut D) -> Result<(), D::Error>,
 {
 }
+
+impl<B, F, D> WrapTrait<traits::ControlBlinking> for FlushWrapper<B, F, D>
+where
+    B: DrawTargetBackend<D, Error = Error<D::Error>>,
+    D: DrawTarget,
+    D::Error: Debug,
+    F: FnMut(&mut D) -> Result<(), D::Error>,
+{
+}

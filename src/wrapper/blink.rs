@@ -17,7 +17,7 @@ use ratatui_core::layout::{Position, Size};
 use ratatui_core::style::Modifier;
 
 use crate::backend::DrawTargetBackend;
-use crate::blink::{Blink, Blinked};
+use crate::blink::{Blink, Blinked, ControlBlinking};
 use crate::error::Error;
 
 use super::traits;
@@ -115,8 +115,6 @@ where
 
                 Some((x, y, cell))
             } else {
-                self.state.ticks = self.state.ticks.wrapping_add(1);
-
                 None
             }
         });
@@ -143,6 +141,10 @@ where
             } else {
                 self.backend.draw(blink_content)?;
             }
+        }
+
+        if self.state.blinking {
+            self.advance_blink_by(1)?;
         }
 
         Ok(())
@@ -185,6 +187,30 @@ where
     }
 }
 
+impl<B, D> DrawTargetBackend<D> for BlinkWrapper<B, D>
+where
+    B: DrawTargetBackend<D, Error = Error<D::Error>>,
+    D: DrawTarget,
+    D::Error: Debug,
+{
+    fn call(&mut self, f: impl FnMut(&mut D) -> Result<(), D::Error>) -> Result<(), D::Error> {
+        self.backend.call(f)
+    }
+
+    fn draw_hidden<'z, I>(&mut self, content: I) -> Result<(), Self::Error>
+    where
+        I: Iterator<Item = (u16, u16, &'z Cell)>,
+    {
+        self.backend.draw_hidden(content)
+    }
+
+    fn advance_blink_by(&mut self, ticks: usize) -> Result<(), Self::Error> {
+        self.state.ticks = self.state.ticks.wrapping_add(ticks);
+
+        self.backend.advance_blink_by(ticks)
+    }
+}
+
 impl<B, D> ConfigureBlinkWrapper for BlinkWrapper<B, D>
 where
     B: DrawTargetBackend<D, Error = Error<D::Error>>,
@@ -208,6 +234,25 @@ where
     }
 }
 
+impl<B, D> ControlBlinking<D> for BlinkWrapper<B, D>
+where
+    B: DrawTargetBackend<D, Error = Error<D::Error>>,
+    D: DrawTarget,
+    D::Error: Debug,
+{
+    fn blinking(&self) -> bool {
+        self.state.blinking
+    }
+
+    fn start_blinking(&mut self) {
+        self.state.blinking = true;
+    }
+
+    fn stop_blinking(&mut self) {
+        self.state.blinking = false;
+    }
+}
+
 impl<B, D> Wrapper for BlinkWrapper<B, D>
 where
     B: DrawTargetBackend<D, Error = Error<D::Error>>,
@@ -227,14 +272,6 @@ where
     fn into_inner(self) -> Self::Inner {
         self.backend
     }
-}
-
-impl<B, D> WrapTrait<traits::DrawTargetBackend> for BlinkWrapper<B, D>
-where
-    B: DrawTargetBackend<D, Error = Error<D::Error>>,
-    D: DrawTarget,
-    D::Error: Debug,
-{
 }
 
 impl<B, D> WrapTrait<traits::ConfigureBackend> for BlinkWrapper<B, D>
