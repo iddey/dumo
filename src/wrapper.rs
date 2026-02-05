@@ -40,9 +40,9 @@ pub trait Wrapper {
 }
 
 /// Marker for blanket implementations.
-trait WrapTrait<T>: Wrapper {}
+pub trait WrapTrait<T>: Wrapper {}
 
-mod traits {
+pub mod traits {
     #[derive(Debug, Clone, Copy)]
     pub struct DrawTargetBackend;
     #[derive(Debug, Clone, Copy)]
