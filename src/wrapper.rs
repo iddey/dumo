@@ -2,6 +2,7 @@
 mod wrap;
 
 pub mod blink;
+pub mod cursor;
 pub mod flush;
 
 use core::fmt::Debug;
@@ -18,6 +19,7 @@ use ratatui_core::buffer::Cell;
 
 use crate::backend::{ConfigureBackend, DrawTargetBackend};
 use crate::color::Palette;
+use crate::cursor::{Colors, Extent, Symbol};
 use crate::error::Error;
 
 /// Wrapper around an arbitrary object.
@@ -42,6 +44,7 @@ pub trait Wrapper {
 /// Marker for blanket implementations.
 pub trait WrapTrait<T>: Wrapper {}
 
+/// List of traits that are available to wrappers, where items are unit structs.
 pub mod traits {
     #[derive(Debug, Clone, Copy)]
     pub struct DrawTargetBackend;
@@ -50,9 +53,14 @@ pub mod traits {
     #[derive(Debug, Clone, Copy)]
     pub struct ConfigureBlinkWrapper;
     #[derive(Debug, Clone, Copy)]
+    pub struct ConfigureCursorWrapper;
+    #[derive(Debug, Clone, Copy)]
     pub struct ControlBlinking;
+    #[derive(Debug, Clone, Copy)]
+    pub struct ControlCursorBlinking;
 }
 
+/// Blanket implementation of the [`DrawTargetBackend`] trait for function call passthrough.
 impl<W, B, D> DrawTargetBackend<D> for W
 where
     B: DrawTargetBackend<D, Error = Error<D::Error>>,
@@ -72,11 +80,26 @@ where
         self.inner_mut().draw_hidden(content)
     }
 
+    fn draw_cursor<'z, I>(
+        &mut self,
+        content: I,
+        colors: Colors,
+        extent: Extent,
+        symbol: Symbol,
+    ) -> Result<(), Self::Error>
+    where
+        I: Iterator<Item = (u16, u16, &'z Cell)>,
+    {
+        self.inner_mut()
+            .draw_cursor(content, colors, extent, symbol)
+    }
+
     fn advance_blink_by(&mut self, ticks: usize) -> Result<(), Self::Error> {
         self.inner_mut().advance_blink_by(ticks)
     }
 }
 
+/// Blanket implementation of the [`ConfigureBackend`] trait for function call passthrough.
 impl<'a, 'b, 'c, W, B, T, C> ConfigureBackend<'a, 'b, 'c, T, C> for W
 where
     B: ConfigureBackend<'a, 'b, 'c, T, C>,

@@ -31,6 +31,9 @@ pub enum Error<T> {
     /// Error that occurred while changing the position of the cursor.
     #[error(transparent)]
     SetCursor(#[from] SetCursorError),
+    /// Error that occurred while changing the frame count of the cursor.
+    #[error(transparent)]
+    AdvanceCursorBlinking(#[from] AdvanceCursorBlinkingError),
 }
 
 /// Error that occurs while measuring the drawing region or the text area, indicating an invalid
@@ -54,4 +57,13 @@ pub enum SetCursorError {
     /// The position would result in the cursor being located outside of the text area.
     #[error("invalid position")]
     InvalidPosition,
+}
+
+/// Error that occurs when attempting to advance the frames and set whether a cursor has _blinked_.
+#[derive(Error, Debug, Clone, Copy)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
+pub enum AdvanceCursorBlinkingError {
+    /// The _blinked_ state is not present in any of the frames for a given animation cycle.
+    #[error("invalid blinked")]
+    InvalidBlinked,
 }

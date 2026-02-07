@@ -9,37 +9,26 @@ use mplusfonts::color::{Invert, Screen, WeightedAvg};
 use mplusfonts::style::BitmapFontStyle;
 
 use crate::backend::DumoBackend;
-#[cfg(feature = "alloc")]
 use crate::blink::{Blink, ControlBlinking};
-#[cfg(feature = "alloc")]
-use crate::cursor::Cursor;
-#[cfg(feature = "alloc")]
 use crate::wrapper::blink::BlinkWrapper;
-#[cfg(feature = "alloc")]
 use crate::wrapper::cursor::CursorWrapper;
 use crate::wrapper::flush::FlushWrapper;
-#[cfg(feature = "alloc")]
-use crate::wrapper::wrap::BLINKING;
 
 impl_wrapper!(
-    FlushWrapper<F>(F: FnMut(&mut D) -> Result<(), D::Error>),
+    CursorWrapper['_],
     DumoBackend<'a, 'b, '_, '_, D, C>,
-    #[cfg(feature = "alloc")]
-    impl_with_blink!(self, BLINKING);
-    #[cfg(feature = "alloc")]
-    impl_with_cursor!('c, self, BLINKING);
+    impl_with_blink!(self, self.blinking(), self.stop_blinking());
+    impl_with_flush!();
 );
 
-#[cfg(feature = "alloc")]
 impl_wrapper!(
-    FlushWrapper<F>(F: FnMut(&mut D) -> Result<(), D::Error>),
+    CursorWrapper['_],
     BlinkWrapper<DumoBackend<'a, 'b, '_, '_, D, C>, D>,
-    impl_with_cursor!('c, self, BLINKING);
+    impl_with_flush!();
 );
 
-#[cfg(feature = "alloc")]
 impl_wrapper!(
-    FlushWrapper<F>(F: FnMut(&mut D) -> Result<(), D::Error>),
-    CursorWrapper<'_, DumoBackend<'a, 'b, '_, '_, D, C>, D>,
-    impl_with_blink!(self, BLINKING);
+    CursorWrapper['_](F: FnMut(&mut D) -> Result<(), D::Error>),
+    FlushWrapper<DumoBackend<'a, 'b, '_, '_, D, C>, F, D>,
+    impl_with_blink!(self, self.blinking(), self.stop_blinking());
 );

@@ -18,6 +18,7 @@ use ratatui_core::style::Modifier;
 
 use crate::backend::DrawTargetBackend;
 use crate::blink::{Blink, Blinked, ControlBlinking};
+use crate::cursor::{Colors, Extent, Symbol};
 use crate::error::Error;
 
 use super::traits;
@@ -108,7 +109,9 @@ where
             if let Some((x, y, cell)) = content.next() {
                 let key = CacheKey::new(x, y);
                 if cell.modifier.intersects(ALL_BLINK) {
-                    self.state.cache.insert_or_replace(key, cell.clone());
+                    let cell = cell.clone();
+                    let tickstamp = self.state.ticks;
+                    self.state.cache.insert_or_replace(key, cell, tickstamp);
                 } else {
                     self.state.cache.remove(&key);
                 }
@@ -131,7 +134,7 @@ where
             let blink_changed = blink != previous_blink;
             let blink_content = self.state.cache.iter().filter_map(|item| {
                 let has_flags = blink_flags == item.cell.modifier.intersection(ALL_BLINK);
-                let has_changed = blink_changed || item.changed;
+                let has_changed = blink_changed || item.tickstamp == self.state.ticks;
 
                 (has_flags && has_changed).then_some((item.key.x, item.key.y, &item.cell))
             });
@@ -202,6 +205,59 @@ where
         I: Iterator<Item = (u16, u16, &'z Cell)>,
     {
         self.backend.draw_hidden(content)
+    }
+
+    fn draw_cursor<'z, I>(
+        &mut self,
+        mut content: I,
+        colors: Colors,
+        extent: Extent,
+        symbol: Symbol,
+    ) -> Result<(), Self::Error>
+    where
+        I: Iterator<Item = (u16, u16, &'z Cell)>,
+    {
+        const SPARSE_BLINK: Modifier = Modifier::SLOW_BLINK.union(Modifier::RAPID_BLINK);
+        const ALL_BLINK: Modifier = SPARSE_BLINK;
+
+        let slow_blink = self.slow_blink.get(self.state.ticks);
+        let rapid_blink = self.rapid_blink.get(self.state.ticks);
+        let sparse_blink = Blinked(slow_blink.0 && rapid_blink.0);
+
+        let content = iter::from_fn(|| {
+            if let Some((x, y, cell)) = content.next() {
+                let cell = match cell.modifier.intersection(ALL_BLINK) {
+                    Modifier::SLOW_BLINK => {
+                        if slow_blink == Blinked(true) {
+                            &Cell::EMPTY
+                        } else {
+                            cell
+                        }
+                    }
+                    Modifier::RAPID_BLINK => {
+                        if rapid_blink == Blinked(true) {
+                            &Cell::EMPTY
+                        } else {
+                            cell
+                        }
+                    }
+                    SPARSE_BLINK => {
+                        if sparse_blink == Blinked(true) {
+                            &Cell::EMPTY
+                        } else {
+                            cell
+                        }
+                    }
+                    _ => cell,
+                };
+
+                Some((x, y, cell))
+            } else {
+                None
+            }
+        });
+
+        self.backend.draw_cursor(content, colors, extent, symbol)
     }
 
     fn advance_blink_by(&mut self, ticks: usize) -> Result<(), Self::Error> {
@@ -282,6 +338,23 @@ where
 {
 }
 
+impl<B, D> WrapTrait<traits::ConfigureCursorWrapper> for BlinkWrapper<B, D>
+where
+    B: DrawTargetBackend<D, Error = Error<D::Error>>,
+    D: DrawTarget,
+    D::Error: Debug,
+{
+}
+
+impl<B, D> WrapTrait<traits::ControlCursorBlinking> for BlinkWrapper<B, D>
+where
+    B: DrawTargetBackend<D, Error = Error<D::Error>>,
+    D: DrawTarget,
+    D::Error: Debug,
+{
+}
+
+/// Blanket implementation of the [`ConfigureBlinkWrapper`] trait for function call passthrough.
 impl<W, B> ConfigureBlinkWrapper for W
 where
     B: ConfigureBlinkWrapper,

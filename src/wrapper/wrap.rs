@@ -12,12 +12,19 @@ use crate::backend::DumoBackend;
 #[cfg(feature = "alloc")]
 use crate::blink::{Blink, ControlBlinking};
 #[cfg(feature = "alloc")]
+use crate::cursor::Cursor;
+#[cfg(feature = "alloc")]
 use crate::wrapper::blink::BlinkWrapper;
+#[cfg(feature = "alloc")]
+use crate::wrapper::cursor::CursorWrapper;
 use crate::wrapper::flush::FlushWrapper;
 
 #[cfg(feature = "alloc")]
+pub const BLINKING: bool = true;
+
+#[cfg(feature = "alloc")]
 macro_rules! impl_with_blink {
-    () => {
+    ($self_ident:ident, $is_blinking:expr $(, $stop_blinking:stmt)?) => {
         /// Returns the backend with a new wrapper around it, redrawing cells to show and hide text
         /// that should blink. Every time a [`Terminal`] calls the [`Backend::draw`] method as part
         /// of the rendering process, the wrapper advances the blinking animation by one frame. The
@@ -27,9 +34,49 @@ macro_rules! impl_with_blink {
         ///
         /// [`Backend::draw`]: ratatui_core::backend::Backend::draw
         /// [`Terminal`]: ratatui_core::terminal::Terminal
-        pub fn with_blink(self, slow_blink: Blink, rapid_blink: Blink) -> BlinkWrapper<Self, D> {
-            let mut wrapper = BlinkWrapper::new(self, slow_blink, rapid_blink);
-            wrapper.start_blinking();
+        pub fn with_blink(
+            #[allow(unused_mut)] mut $self_ident,
+            slow_blink: Blink,
+            rapid_blink: Blink,
+        ) -> BlinkWrapper<Self, D> {
+            let is_blinking = $is_blinking;
+            $($stop_blinking)?
+
+            let mut wrapper = BlinkWrapper::new($self_ident, slow_blink, rapid_blink);
+            if is_blinking {
+                wrapper.start_blinking();
+            }
+
+            wrapper
+        }
+    };
+}
+
+#[cfg(feature = "alloc")]
+macro_rules! impl_with_cursor {
+    ($lifetime:lifetime, $self_ident:ident, $is_blinking:expr $(, $stop_blinking:stmt)?) => {
+        /// Returns the backend with a new wrapper around it, drawing over cells to indicate cursor
+        /// position. Every frame after a [`Terminal`] calls the [`Backend::show_cursor`] method is
+        /// one that shows a cursor as long as it has _blinked_ on that frame. The [`Terminal`] can
+        /// also move the cursor by calling [`Backend::set_cursor_position`].
+        ///
+        /// Backends without this wrapper do not display a cursor or track its position.
+        ///
+        /// [`Backend::set_cursor_position`]: ratatui_core::backend::Backend::set_cursor_position
+        /// [`Backend::show_cursor`]: ratatui_core::backend::Backend::show_cursor
+        /// [`Terminal`]: ratatui_core::terminal::Terminal
+        pub fn with_cursor<$lifetime>(
+            #[allow(unused_mut)] mut $self_ident,
+            cursor: Cursor<$lifetime>,
+        ) -> CursorWrapper<$lifetime, Self, D> {
+            let is_blinking = $is_blinking;
+            $($stop_blinking)?
+
+            let mut wrapper = CursorWrapper::new($self_ident, cursor);
+            if is_blinking {
+                wrapper.start_blinking();
+            }
+
             wrapper
         }
     };
@@ -66,7 +113,9 @@ where
     BitmapFontStyle<'a, 'b, D::Color, C, 1>: TextRenderer<Color = D::Color>,
 {
     #[cfg(feature = "alloc")]
-    impl_with_blink!();
+    impl_with_blink!(self, BLINKING);
+    #[cfg(feature = "alloc")]
+    impl_with_cursor!('c, self, BLINKING);
     impl_with_flush!();
 }
 

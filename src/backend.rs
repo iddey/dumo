@@ -15,6 +15,7 @@ use embedded_graphics::pixelcolor::{PixelColor, Rgb888};
 use embedded_graphics::primitives::Rectangle;
 use embedded_graphics::text::renderer::TextRenderer;
 use embedded_graphics::text::{Baseline, DecorationColor};
+use embedded_graphics::transform::Transform;
 use mplusfonts::BitmapFont;
 use mplusfonts::color::{Invert, Screen, WeightedAvg};
 use mplusfonts::style::BitmapFontStyle;
@@ -24,11 +25,14 @@ use ratatui_core::layout::{Position, Size};
 use ratatui_core::style::Modifier;
 
 use crate::color::{MapWith, Palette, Palettes};
+use crate::cursor::{Colors, Extent, Symbol};
 use crate::error::{Error, MeasureError, SetCursorError};
 
 pub use crate::wrapper::Wrapper;
 #[cfg(feature = "alloc")]
 pub use crate::wrapper::blink::{BlinkWrapper, ConfigureBlinkWrapper};
+#[cfg(feature = "alloc")]
+pub use crate::wrapper::cursor::{ConfigureCursorWrapper, CursorWrapper};
 pub use crate::wrapper::flush::FlushWrapper;
 
 /// Backend for Ratatui that renders to a display with the [`embedded-graphics`](embedded_graphics)
@@ -79,6 +83,25 @@ pub trait DrawTargetBackend<D: DrawTarget>: Backend {
     /// colors if [`REVERSED`](ratatui_core::style::Modifier::REVERSED) is set — to clear the cells
     /// that each of the characters or character clusters spans.
     fn draw_hidden<'z, I>(&mut self, content: I) -> Result<(), Self::Error>
+    where
+        I: Iterator<Item = (u16, u16, &'z Cell)>;
+
+    /// Draws the specified content using another set of colors and cropped to the specified extent
+    /// with the [`Symbol::UnderCursor`] parameter; otherwise, the characters or character clusters
+    /// from the [`Symbol::Custom`] parameter are drawn instead.
+    ///
+    /// If the content is reversed, then the set of colors for the cursor are also reversed, and if
+    /// the content has text decorations, then those are also applied if [`Symbol::UnderCursor`] is
+    /// drawn, as is whether text should be bold or hidden, including having _blinked_.
+    ///
+    /// [`Symbol::Custom`] only respects the content's modifier to have the set of colors reversed.
+    fn draw_cursor<'z, I>(
+        &mut self,
+        content: I,
+        colors: Colors,
+        extent: Extent,
+        symbol: Symbol,
+    ) -> Result<(), Self::Error>
     where
         I: Iterator<Item = (u16, u16, &'z Cell)>;
 
@@ -486,6 +509,176 @@ where
             self.target
                 .fill_solid(&fill_area, background_color)
                 .map_err(Error::Draw)?;
+        }
+
+        Ok(())
+    }
+
+    fn draw_cursor<'z, I>(
+        &mut self,
+        content: I,
+        colors: Colors,
+        extent: Extent,
+        symbol: Symbol,
+    ) -> Result<(), Self::Error>
+    where
+        I: Iterator<Item = (u16, u16, &'z Cell)>,
+    {
+        use MeasureError::*;
+        use embedded_graphics::geometry::Size;
+        use unicode_width::UnicodeWidthStr;
+
+        const ORIGIN: Point = Point::zero();
+        const BASELINE: Baseline = Baseline::Top;
+
+        let cell_size = self.font.cell_size();
+        for (x, y, cell) in content {
+            let [text_color, background_color] = match colors {
+                Colors::ReversedReset => {
+                    let text_color = self.fg_reset.unwrap_or(D::Color::default().invert());
+                    let background_color = self.bg_reset.unwrap_or_default();
+
+                    [background_color, text_color]
+                }
+                Colors::InvertedReset => {
+                    let text_color = self.fg_reset.unwrap_or(D::Color::default().invert());
+                    let text_color = text_color.invert();
+                    let background_color = self.bg_reset.unwrap_or_default();
+                    let background_color = background_color.invert();
+
+                    [text_color, background_color]
+                }
+                Colors::Custom { fg, bg } => {
+                    let text_color = fg.map_with(self.palette).or(self.fg_reset);
+                    let text_color = text_color.unwrap_or(D::Color::default().invert());
+                    let background_color = bg.map_with(self.palette).or(self.bg_reset);
+                    let background_color = background_color.unwrap_or_default();
+
+                    [text_color, background_color]
+                }
+            };
+
+            let is_reversed = cell.modifier.intersects(Modifier::REVERSED);
+            let [text_color, background_color] = if is_reversed {
+                [background_color, text_color]
+            } else {
+                [text_color, background_color]
+            };
+
+            let is_underlined = cell.modifier.intersects(Modifier::UNDERLINED);
+            let underline_color = if is_underlined && symbol == Symbol::UnderCursor {
+                cell.underline_color
+                    .map_with(self.palette)
+                    .map(DecorationColor::Custom)
+                    .unwrap_or(DecorationColor::TextColor)
+            } else {
+                DecorationColor::None
+            };
+
+            let is_crossed_out = cell.modifier.intersects(Modifier::CROSSED_OUT);
+            let strikethrough_color = if is_crossed_out && symbol == Symbol::UnderCursor {
+                DecorationColor::TextColor
+            } else {
+                DecorationColor::None
+            };
+
+            let mut renderer = BitmapFontStyle::new(self.font, text_color);
+            renderer.background_color = Some(background_color);
+            renderer.underline_color = underline_color;
+            renderer.strikethrough_color = strikethrough_color;
+
+            let text = cell.symbol();
+
+            let columns_rows = [x, y].map(Into::into).into();
+            let pixels = cell_size.checked_component_mul(columns_rows);
+            let [x_offset, y_offset] = pixels.ok_or(InvalidSize)?.into();
+            let top_left = Point {
+                x: ORIGIN.x.saturating_add_unsigned(x_offset),
+                y: ORIGIN.y.saturating_add_unsigned(y_offset),
+            };
+
+            let columns = text.width().try_into().unwrap_or(u32::MAX);
+            let pixels = cell_size.width.checked_mul(columns);
+            let explicit_width = pixels.ok_or(InvalidSize)?;
+            let size = Size::new(explicit_width, renderer.line_height());
+            let text_area = Rectangle { top_left, size };
+            let clip_area = match extent {
+                Extent::FullBlock => text_area,
+                Extent::VerticalBar { width } => {
+                    let explicit_width = explicit_width.min(width);
+
+                    text_area.resized_width(explicit_width, AnchorX::Left)
+                }
+                Extent::Underline { height } => {
+                    let top = renderer.font.metrics.y_offset(Baseline::Top);
+                    let top = top.saturating_sub(renderer.font.underline.y_offset());
+                    let top = top.saturating_add(top_left.y);
+                    let bottom = top.saturating_add_unsigned(height);
+
+                    text_area.y_reduce(top, bottom)
+                }
+                Extent::Custom(area) => {
+                    let area = area.translate(top_left);
+
+                    text_area.intersection(&area)
+                }
+            };
+
+            let mut adapter = self.target.clipped(&clip_area);
+
+            let text = match symbol {
+                Symbol::UnderCursor => text,
+                Symbol::Custom(text) => text,
+            };
+
+            let is_hidden = cell.modifier.intersects(Modifier::HIDDEN);
+            if is_hidden && symbol == Symbol::UnderCursor
+                || text.chars().all(|char| char::is_ascii_whitespace(&char))
+            {
+                self.target
+                    .fill_solid(&clip_area, background_color)
+                    .map_err(Error::Draw)?;
+            } else {
+                let metrics = renderer.measure_string(text, top_left, BASELINE);
+                let pixels = metrics.next_position.x.saturating_sub(top_left.x);
+                let inherent_width = pixels.try_into().unwrap_or_default();
+                let crop_area = text_area.resized_width(inherent_width, self.anchor_x);
+                let mut adapter = adapter.translated(crop_area.top_left);
+
+                let is_bold = cell.modifier.intersects(Modifier::BOLD);
+                if is_bold
+                    && let Some(font_bold) = self.font_bold
+                    && symbol == Symbol::UnderCursor
+                {
+                    renderer.font = font_bold;
+                    renderer
+                        .draw_string(text, Point::zero(), BASELINE, &mut adapter)
+                        .map_err(Error::Draw)?;
+
+                    let metrics = renderer.measure_string(text, crop_area.top_left, BASELINE);
+                    let left = clip_area.left_of(&metrics.bounding_box);
+                    let right = clip_area.indent_to(metrics.next_position.x);
+                    let middle = clip_area.left_of(&right).right_of(&left);
+                    let below = middle.below(&metrics.bounding_box);
+                    for area in [left, right, below] {
+                        self.target
+                            .fill_solid(&area, background_color)
+                            .map_err(Error::Draw)?;
+                    }
+                } else {
+                    renderer
+                        .draw_string(text, Point::zero(), BASELINE, &mut adapter)
+                        .map_err(Error::Draw)?;
+
+                    let left = clip_area.left_of(&crop_area);
+                    let right = clip_area.right_of(&crop_area);
+                    for area in [left, right] {
+                        self.target
+                            .fill_solid(&area, background_color)
+                            .map_err(Error::Draw)?;
+                    }
+                }
+            }
         }
 
         Ok(())

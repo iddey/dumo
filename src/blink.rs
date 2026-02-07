@@ -3,6 +3,7 @@
 use core::fmt::Debug;
 
 use embedded_graphics::draw_target::DrawTarget;
+use ratatui_core::backend::Backend;
 
 use crate::backend::DrawTargetBackend;
 use crate::wrapper::WrapTrait;
@@ -28,27 +29,21 @@ pub enum Blink {
 /// a varying number of times per frame, or just more than once per what should count as one frame.
 ///
 /// [`Terminal`]: ratatui_core::terminal::Terminal
-/// [`Backend::draw`]: ratatui_core::backend::Backend::draw
 pub trait ControlBlinking<D: DrawTarget>
 where
     Self: DrawTargetBackend<D>,
 {
     /// Returns `true` if calls to the [`Backend::draw`] method also advance the blinking animation
     /// every time.
-    ///
-    /// [`Backend::draw`]: ratatui_core::backend::Backend::draw
     fn blinking(&self) -> bool;
 
     /// Starts driving the blinking animation, stepping by one frame at the end of each call to the
     /// [`Backend::draw`] method. This is the default behavior.
-    ///
-    /// [`Backend::draw`]: ratatui_core::backend::Backend::draw
     fn start_blinking(&mut self);
 
     /// Stops the blinking animation being driven by calls to the [`Backend::draw`] method, meaning
     /// that [`advance_blink`] needs to be called every frame.
     ///
-    /// [`Backend::draw`]: ratatui_core::backend::Backend::draw
     /// [`advance_blink`]: ControlBlinking::advance_blink
     fn stop_blinking(&mut self);
 
@@ -56,6 +51,20 @@ where
     fn advance_blink(&mut self) -> Result<(), Self::Error> {
         self.advance_blink_by(1)
     }
+}
+
+/// Blinking animation controls for a cursor. Useful for revealing the cursor at its new position
+/// whenever it moves, after a [`Terminal`] invokes the [`Backend::set_cursor_position`] method.
+///
+/// [`Terminal`]: ratatui_core::terminal::Terminal
+pub trait ControlCursorBlinking
+where
+    Self: Backend,
+{
+    /// Advances the blink animation cycle for the cursor if its _blinked_ state does not match the
+    /// specified state, stepping forward until it does, or returning an error if there is no match
+    /// in any of the frames.
+    fn advance_cursor_blink_to(&mut self, blinked: Blinked) -> Result<(), Self::Error>;
 }
 
 impl Blink {
@@ -88,6 +97,7 @@ impl Blink {
     }
 }
 
+/// Blanket implementation of the [`ControlBlinking`] trait for function call passthrough.
 impl<W, B, D> ControlBlinking<D> for W
 where
     B: ControlBlinking<D>,
@@ -110,5 +120,17 @@ where
 
     fn advance_blink(&mut self) -> Result<(), Self::Error> {
         self.inner_mut().advance_blink()
+    }
+}
+
+/// Blanket implementation of the [`ControlCursorBlinking`] trait for function call passthrough.
+impl<W, B> ControlCursorBlinking for W
+where
+    B: ControlCursorBlinking,
+    W: Backend<Error = B::Error>,
+    W: WrapTrait<traits::ControlCursorBlinking, Inner = B>,
+{
+    fn advance_cursor_blink_to(&mut self, blinked: Blinked) -> Result<(), Self::Error> {
+        self.inner_mut().advance_cursor_blink_to(blinked)
     }
 }

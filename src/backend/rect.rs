@@ -12,6 +12,10 @@ pub trait RectangleExt {
     /// Returns the rectangle's area that only has pixels below the specified area.
     fn below(&self, other: &Self) -> Self;
 
+    /// Returns the rectangle with its area reduced along the _y_-axis to the specified top and
+    /// bottom rows, excluding the bottom row itself.
+    fn y_reduce(&self, top: i32, bottom: i32) -> Self;
+
     /// Returns the rectangle with its left side indented to the right, making the specified column
     /// its new left side.
     fn indent_to(&self, right: i32) -> Self;
@@ -48,6 +52,21 @@ impl RectangleExt for Rectangle {
         let height = height.try_into().unwrap_or_default();
         let size = Size::new(Default::default(), height);
         let size = self.size.saturating_sub(size);
+
+        Self { top_left, size }
+    }
+
+    fn y_reduce(&self, top: i32, bottom: i32) -> Self {
+        let extent = top.saturating_sub(self.top_left.y);
+        let extent = extent.try_into().unwrap_or_default();
+        let new_size = Size::new(Default::default(), extent);
+        let new_size = self.size.saturating_sub(new_size);
+        let top_left = Point::new(self.top_left.x, top);
+        let top_left = self.top_left.component_max(top_left);
+        let height = bottom.saturating_sub(top_left.y);
+        let height = height.try_into().unwrap_or_default();
+        let size = Size::new(self.size.width, height);
+        let size = new_size.component_min(size);
 
         Self { top_left, size }
     }
@@ -225,6 +244,89 @@ mod tests {
             Rectangle::new(Point::new(i32::MAX, i32::MAX), Size::new(u32::MAX, u32::MAX)),
             Rectangle::new(Point::new(i32::MIN, i32::MIN), Size::new(u32::MAX, u32::MAX / 2)),
             Rectangle::new(Point::new(i32::MAX, i32::MAX), Size::new(u32::MAX, u32::MAX)),
+    }
+
+    macro_rules! test_y_reduce {
+        (
+            $(
+                $fn_ident:ident, $self:expr, $top:expr, $bottom:expr, $expected:expr,
+            )*
+        ) => {
+            $(
+                #[test]
+                fn $fn_ident() {
+                    let result = $self.y_reduce($top, $bottom);
+                    assert_eq!(result, $expected);
+                }
+            )*
+        }
+    }
+
+    test_y_reduce! {
+        y_reduce_top_to_0_for_1111_2222_3333_4444,
+            Rectangle::new(Point::new(1111, 2222), Size::new(3333, 4444)),
+            0, 4444 + 2222,
+            Rectangle::new(Point::new(1111, 2222), Size::new(3333, 4444)),
+
+        y_reduce_top_to_1600_for_1111_2222_3333_4444,
+            Rectangle::new(Point::new(1111, 2222), Size::new(3333, 4444)),
+            1600, 4444 + 2222,
+            Rectangle::new(Point::new(1111, 2222), Size::new(3333, 4444)),
+
+        y_reduce_top_to_3200_for_1111_2222_3333_4444,
+            Rectangle::new(Point::new(1111, 2222), Size::new(3333, 4444)),
+            3200, 4444 + 2222,
+            Rectangle::new(Point::new(1111, 3200), Size::new(3333, 4444 + 2222 - 3200)),
+
+        y_reduce_top_to_6400_for_1111_2222_3333_4444,
+            Rectangle::new(Point::new(1111, 2222), Size::new(3333, 4444)),
+            6400, 4444 + 2222,
+            Rectangle::new(Point::new(1111, 6400), Size::new(3333, 4444 + 2222 - 6400)),
+
+        y_reduce_bottom_to_3200_for_1111_2222_3333_4444,
+            Rectangle::new(Point::new(1111, 2222), Size::new(3333, 4444)),
+            2222, 3200,
+            Rectangle::new(Point::new(1111, 2222), Size::new(3333, 3200 - 2222)),
+
+        y_reduce_bottom_to_6400_for_1111_2222_3333_4444,
+            Rectangle::new(Point::new(1111, 2222), Size::new(3333, 4444)),
+            2222, 6400,
+            Rectangle::new(Point::new(1111, 2222), Size::new(3333, 6400 - 2222)),
+
+        y_reduce_bottom_to_12800_for_1111_2222_3333_4444,
+            Rectangle::new(Point::new(1111, 2222), Size::new(3333, 4444)),
+            2222, 12800,
+            Rectangle::new(Point::new(1111, 2222), Size::new(3333, 4444)),
+
+        y_reduce_top_to_1600_and_bottom_to_6400_for_1111_2222_3333_4444,
+            Rectangle::new(Point::new(1111, 2222), Size::new(3333, 4444)),
+            1600, 3200,
+            Rectangle::new(Point::new(1111, 2222), Size::new(3333, 3200 - 2222)),
+
+        y_reduce_top_to_3200_and_bottom_to_6400_for_1111_2222_3333_4444,
+            Rectangle::new(Point::new(1111, 2222), Size::new(3333, 4444)),
+            3200, 6400,
+            Rectangle::new(Point::new(1111, 3200), Size::new(3333, 6400 - 3200)),
+
+        y_reduce_top_to_6400_and_bottom_to_12800_for_1111_2222_3333_4444,
+            Rectangle::new(Point::new(1111, 2222), Size::new(3333, 4444)),
+            6400, 12800,
+            Rectangle::new(Point::new(1111, 6400), Size::new(3333, 4444 + 2222 - 6400)),
+
+        y_reduce_top_to_0_and_bottom_to_25600_for_1111_2222_3333_4444,
+            Rectangle::new(Point::new(1111, 2222), Size::new(3333, 4444)),
+            0, 25600,
+            Rectangle::new(Point::new(1111, 2222), Size::new(3333, 4444)),
+
+        y_reduce_top_to_25600_and_bottom_to_0_for_1111_2222_3333_4444,
+            Rectangle::new(Point::new(1111, 2222), Size::new(3333, 4444)),
+            25600, 0,
+            Rectangle::new(Point::new(1111, 25600), Size::new(3333, 0)),
+
+        y_reduce_top_to_max_and_bottom_to_max_for_1111_2222_3333_4444,
+            Rectangle::new(Point::new(1111, 2222), Size::new(3333, 4444)),
+            i32::MAX, i32::MAX,
+            Rectangle::new(Point::new(1111, i32::MAX), Size::new(3333, 0)),
     }
 
     macro_rules! test_indent_to {

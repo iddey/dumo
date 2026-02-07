@@ -16,6 +16,7 @@ mod wrapper;
 
 pub mod blink;
 pub mod color;
+pub mod cursor;
 pub mod error;
 
 pub use backend::*;

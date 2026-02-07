@@ -18,7 +18,7 @@ pub struct CacheItem {
     pub key: CacheKey,
     #[defmt(Debug2Format)]
     pub cell: Cell,
-    pub changed: bool,
+    pub tickstamp: usize,
 }
 
 #[derive(Debug, Clone)]
@@ -32,8 +32,12 @@ impl CacheKey {
 }
 
 impl CacheItem {
-    pub const fn new(key: CacheKey, cell: Cell, changed: bool) -> Self {
-        Self { key, cell, changed }
+    pub const fn new(key: CacheKey, cell: Cell, tickstamp: usize) -> Self {
+        Self {
+            key,
+            cell,
+            tickstamp,
+        }
     }
 }
 
@@ -42,15 +46,19 @@ impl Cache {
         Self(Vec::new())
     }
 
-    pub fn insert_or_replace(&mut self, key: CacheKey, cell: Cell) -> Option<CacheItem> {
+    pub fn insert_or_replace(
+        &mut self,
+        key: CacheKey,
+        cell: Cell,
+        tickstamp: usize,
+    ) -> Option<CacheItem> {
         use unicode_width::UnicodeWidthStr;
 
         let Self(vec) = self;
         match vec.binary_search_by_key(&key, |e| e.key) {
             Ok(index) => {
                 let width = cell.symbol().width();
-                let changed = cell != vec[index].cell;
-                let item = CacheItem::new(key, cell, changed);
+                let item = CacheItem::new(key, cell, tickstamp);
                 let item = mem::replace(&mut vec[index], item);
                 for x in (item.cell.symbol().width()..width)
                     .filter_map(|x_offset| x_offset.try_into().ok())
@@ -65,7 +73,7 @@ impl Cache {
                 Some(item)
             }
             Err(index) => {
-                let item = CacheItem::new(key, cell, true);
+                let item = CacheItem::new(key, cell, tickstamp);
                 vec.insert(index, item);
 
                 None
