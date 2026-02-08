@@ -90,7 +90,7 @@ where
 {
     type Error = B::Error;
 
-    fn draw<'z, I>(&mut self, mut content: I) -> Result<(), Self::Error>
+    fn draw<'z, I>(&mut self, content: I) -> Result<(), Self::Error>
     where
         I: Iterator<Item = (u16, u16, &'z Cell)>,
     {
@@ -105,20 +105,14 @@ where
         let previous_rapid_blink = self.rapid_blink.get(self.state.ticks.wrapping_sub(1));
         let previous_sparse_blink = Blinked(previous_slow_blink.0 && previous_rapid_blink.0);
 
-        let content = iter::from_fn(|| {
-            if let Some((x, y, cell)) = content.next() {
-                let key = CacheKey::new(x, y);
-                if cell.modifier.intersects(ALL_BLINK) {
-                    let cell = cell.clone();
-                    let tickstamp = self.state.ticks;
-                    self.state.cache.insert_or_replace(key, cell, tickstamp);
-                } else {
-                    self.state.cache.remove(&key);
-                }
-
-                Some((x, y, cell))
+        let content = content.inspect(|&(x, y, cell)| {
+            let key = CacheKey::new(x, y);
+            if cell.modifier.intersects(ALL_BLINK) {
+                let cell = cell.clone();
+                let tickstamp = self.state.ticks;
+                self.state.cache.insert_or_replace(key, cell, tickstamp);
             } else {
-                None
+                self.state.cache.remove(&key);
             }
         });
 
@@ -209,7 +203,7 @@ where
 
     fn draw_cursor<'z, I>(
         &mut self,
-        mut content: I,
+        content: I,
         colors: Colors,
         extent: Extent,
         symbol: Symbol,
@@ -224,40 +218,38 @@ where
         let rapid_blink = self.rapid_blink.get(self.state.ticks);
         let sparse_blink = Blinked(slow_blink.0 && rapid_blink.0);
 
-        let content = iter::from_fn(|| {
-            if let Some((x, y, cell)) = content.next() {
-                let cell = match cell.modifier.intersection(ALL_BLINK) {
-                    Modifier::SLOW_BLINK => {
-                        if slow_blink == Blinked(true) {
-                            &Cell::EMPTY
-                        } else {
-                            cell
-                        }
+        for (x, y, cell) in content {
+            let cell = match cell.modifier.intersection(ALL_BLINK) {
+                Modifier::SLOW_BLINK => {
+                    if slow_blink == Blinked(true) {
+                        &Cell::EMPTY
+                    } else {
+                        cell
                     }
-                    Modifier::RAPID_BLINK => {
-                        if rapid_blink == Blinked(true) {
-                            &Cell::EMPTY
-                        } else {
-                            cell
-                        }
+                }
+                Modifier::RAPID_BLINK => {
+                    if rapid_blink == Blinked(true) {
+                        &Cell::EMPTY
+                    } else {
+                        cell
                     }
-                    SPARSE_BLINK => {
-                        if sparse_blink == Blinked(true) {
-                            &Cell::EMPTY
-                        } else {
-                            cell
-                        }
+                }
+                SPARSE_BLINK => {
+                    if sparse_blink == Blinked(true) {
+                        &Cell::EMPTY
+                    } else {
+                        cell
                     }
-                    _ => cell,
-                };
+                }
+                _ => cell,
+            };
 
-                Some((x, y, cell))
-            } else {
-                None
-            }
-        });
+            let content = iter::once((x, y, cell));
 
-        self.backend.draw_cursor(content, colors, extent, symbol)
+            self.backend.draw_cursor(content, colors, extent, symbol)?;
+        }
+
+        Ok(())
     }
 
     fn advance_blink_by(&mut self, ticks: usize) -> Result<(), Self::Error> {

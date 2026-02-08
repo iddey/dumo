@@ -5,7 +5,6 @@ mod state;
 mod wrap;
 
 use core::fmt::Debug;
-use core::iter;
 use core::marker::PhantomData;
 
 use self::cache::CacheKey;
@@ -96,7 +95,7 @@ where
         }
     }
 
-    fn draw_internal<'z, I, const HIDDEN: bool>(&mut self, mut content: I) -> Result<(), B::Error>
+    fn draw_internal<'z, I, const HIDDEN: bool>(&mut self, content: I) -> Result<(), B::Error>
     where
         I: Iterator<Item = (u16, u16, &'z Cell)>,
     {
@@ -106,33 +105,26 @@ where
         let previous_cursor_blink = self.cursor.blink.get(self.state.ticks.wrapping_sub(1));
         let mut cursor_content = None;
 
-        let content = iter::from_fn(|| {
-            if let Some((x, y, cell)) = content.next() {
-                let key = CacheKey::new(x, y);
-                let mut modified_cell = cell.clone();
-                modified_cell.modifier = if HIDDEN {
-                    modified_cell.modifier.union(Modifier::HIDDEN)
-                } else {
-                    modified_cell.modifier
-                };
+        let content = content.inspect(|&(x, y, cell)| {
+            let key = CacheKey::new(x, y);
+            let mut cell = cell.clone();
 
-                if y == self.state.cursor_position.y {
-                    for x in (0..modified_cell.symbol().width())
-                        .filter_map(|x_offset| x_offset.try_into().ok())
-                        .filter_map(|x_offset| x.checked_add(x_offset))
-                    {
-                        if x == self.state.cursor_position.x {
-                            cursor_content.replace((x, y, modified_cell.clone()));
-                        }
+            if HIDDEN {
+                cell.modifier = cell.modifier.union(Modifier::HIDDEN)
+            }
+
+            if y == self.state.cursor_position.y {
+                for x in (0..cell.symbol().width())
+                    .filter_map(|x_offset| x_offset.try_into().ok())
+                    .filter_map(|x_offset| x.checked_add(x_offset))
+                {
+                    if x == self.state.cursor_position.x {
+                        cursor_content.replace((x, y, cell.clone()));
                     }
                 }
-
-                self.state.cache.insert_or_replace(key, modified_cell);
-
-                Some((x, y, cell))
-            } else {
-                None
             }
+
+            self.state.cache.insert_or_replace(key, cell);
         });
 
         if HIDDEN {
