@@ -300,9 +300,13 @@ where
             let mut adapter = self.target.clipped(&clip_area);
 
             let is_hidden = cell.modifier.intersects(Modifier::HIDDEN);
-            if is_hidden || text.chars().all(|char| char::is_ascii_whitespace(&char)) {
+            if is_hidden {
                 self.target
                     .fill_solid(&clip_area, background_color)
+                    .map_err(Error::Draw)?;
+            } else if text.chars().all(|char| char::is_ascii_whitespace(&char)) {
+                renderer
+                    .draw_whitespace(explicit_width, top_left, BASELINE, &mut adapter)
                     .map_err(Error::Draw)?;
             } else {
                 let metrics = renderer.measure_string(text, top_left, BASELINE);
@@ -632,11 +636,13 @@ where
             };
 
             let is_hidden = cell.modifier.intersects(Modifier::HIDDEN);
-            if is_hidden && symbol == Symbol::UnderCursor
-                || text.chars().all(|char| char::is_ascii_whitespace(&char))
-            {
+            if is_hidden && symbol == Symbol::UnderCursor {
                 self.target
                     .fill_solid(&clip_area, background_color)
+                    .map_err(Error::Draw)?;
+            } else if text.chars().all(|char| char::is_ascii_whitespace(&char)) {
+                renderer
+                    .draw_whitespace(explicit_width, top_left, BASELINE, &mut adapter)
                     .map_err(Error::Draw)?;
             } else {
                 let metrics = renderer.measure_string(text, top_left, BASELINE);
