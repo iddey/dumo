@@ -103,43 +103,33 @@ impl Cursor<'_> {
     /// Sets the blinking animation to have a single frame that always shows the cursor being on.
     #[must_use = "method consumes the cursor and returns one with the new settings"]
     pub const fn solid_on(self) -> Self {
-        self.with_blink(Blink::with_period(0))
-    }
-
-    /// Sets the foreground and background colors to the same one that always shows the cursor as
-    /// having a single color.
-    #[must_use = "method consumes the cursor and returns one with the new settings"]
-    pub const fn solid_color(self, color: Color) -> Self {
-        self.with_colors(Colors::Custom {
-            fg: color,
-            bg: color,
-        })
+        self.blink(Blink::with_period(0))
     }
 
     /// Sets the blink animation cycle for the cursor.
     #[must_use = "method consumes the cursor and returns one with the new settings"]
-    pub const fn with_blink(mut self, blink: Blink) -> Self {
+    pub const fn blink(mut self, blink: Blink) -> Self {
         self.blink = blink;
         self
     }
 
     /// Sets the method used by the cursor for choosing colors.
     #[must_use = "method consumes the cursor and returns one with the new settings"]
-    pub const fn with_colors(mut self, colors: Colors) -> Self {
+    pub const fn colors(mut self, colors: Colors) -> Self {
         self.colors = colors;
         self
     }
 
     /// Sets the shape that represents the cursor inside of the cell area.
     #[must_use = "method consumes the cursor and returns one with the new settings"]
-    pub const fn with_extent(mut self, extent: Extent) -> Self {
+    pub const fn extent(mut self, extent: Extent) -> Self {
         self.extent = extent;
         self
     }
 
     /// Sets the source of the content that the cursor uses to symbolize itself.
     #[must_use = "method consumes the cursor and returns one with the new settings"]
-    pub const fn with_symbol<'a>(self, symbol: Symbol<'a>) -> Cursor<'a> {
+    pub const fn symbol<'a>(self, symbol: Symbol<'a>) -> Cursor<'a> {
         Cursor { symbol, ..self }
     }
 }
