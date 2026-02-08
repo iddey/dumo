@@ -219,31 +219,21 @@ where
         let sparse_blink = Blinked(slow_blink.0 && rapid_blink.0);
 
         for (x, y, cell) in content {
-            let cell = match cell.modifier.intersection(ALL_BLINK) {
-                Modifier::SLOW_BLINK => {
-                    if slow_blink == Blinked(true) {
-                        &Cell::EMPTY
-                    } else {
-                        cell
-                    }
-                }
-                Modifier::RAPID_BLINK => {
-                    if rapid_blink == Blinked(true) {
-                        &Cell::EMPTY
-                    } else {
-                        cell
-                    }
-                }
-                SPARSE_BLINK => {
-                    if sparse_blink == Blinked(true) {
-                        &Cell::EMPTY
-                    } else {
-                        cell
-                    }
-                }
-                _ => cell,
+            let blink_flags = cell.modifier.intersection(ALL_BLINK);
+            let is_hidden = blink_flags == Modifier::SLOW_BLINK && slow_blink == Blinked(true)
+                || blink_flags == Modifier::RAPID_BLINK && rapid_blink == Blinked(true)
+                || blink_flags == SPARSE_BLINK && sparse_blink == Blinked(true);
+
+            let clone = if is_hidden {
+                let mut cell = cell.clone();
+                cell.modifier = cell.modifier.union(Modifier::HIDDEN);
+
+                Some(cell)
+            } else {
+                None
             };
 
+            let cell = clone.as_ref().unwrap_or(cell);
             let content = iter::once((x, y, cell));
 
             self.backend.draw_cursor(content, colors, extent, symbol)?;
