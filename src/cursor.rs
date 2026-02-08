@@ -66,6 +66,7 @@ pub enum Symbol<'a> {
 }
 
 /// Cursor indicator appearance settings.
+#[non_exhaustive]
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct Cursor<'a> {
@@ -90,7 +91,7 @@ impl Cursor<'_> {
     /// Creates a new cursor that is solid on, uses the [`Reset`](Color::Reset) colors swapped with
     /// one another, drawing to the entire area of the cell or cells. This is default configuration
     /// for a cursor, and it also renders the symbol found at the position of the cursor.
-    pub const fn new() -> Self {
+    pub const fn const_default() -> Self {
         Self {
             blink: Blink::with_period(0),
             colors: Colors::ReversedReset,
@@ -145,7 +146,7 @@ impl Cursor<'_> {
 
 impl Default for Cursor<'_> {
     fn default() -> Self {
-        Self::new()
+        Self::const_default()
     }
 }
 
