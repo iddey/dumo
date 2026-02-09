@@ -55,20 +55,12 @@ impl Cache {
         use unicode_width::UnicodeWidthStr;
 
         let Self(vec) = self;
-        match vec.binary_search_by_key(&key, |e| e.key) {
+        let CacheKey { x, y } = key;
+        let end = cell.symbol().width();
+        let item = match vec.binary_search_by_key(&key, |e| e.key) {
             Ok(index) => {
-                let width = cell.symbol().width();
                 let item = CacheItem::new(key, cell, tickstamp);
                 let item = mem::replace(&mut vec[index], item);
-                for x in (item.cell.symbol().width()..width)
-                    .filter_map(|x_offset| x_offset.try_into().ok())
-                    .filter_map(|x_offset| key.x.checked_add(x_offset))
-                {
-                    let key = CacheKey { x, ..key };
-                    if let Ok(offset) = vec[index..].binary_search_by_key(&key, |e| e.key) {
-                        let _ = vec.remove(index + offset);
-                    }
-                }
 
                 Some(item)
             }
@@ -78,7 +70,23 @@ impl Cache {
 
                 None
             }
+        };
+
+        let start = item
+            .as_ref()
+            .map(|item| &item.cell)
+            .map(|cell| cell.symbol().width())
+            .unwrap_or(1);
+
+        for right in (start..end)
+            .filter_map(|x_offset| x_offset.try_into().ok())
+            .filter_map(|x_offset| x.checked_add(x_offset))
+        {
+            let key = CacheKey::new(right, y);
+            let _ = self.remove(&key);
         }
+
+        item
     }
 
     pub fn remove(&mut self, key: &CacheKey) -> Option<CacheItem> {

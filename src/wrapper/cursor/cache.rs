@@ -66,17 +66,26 @@ impl Cache {
     pub fn insert_or_replace(&mut self, key: CacheKey, cell: Cell) -> Option<CacheItem> {
         use unicode_width::UnicodeWidthStr;
 
-        let width = cell.symbol().width();
+        let Self(map) = self;
+        let CacheKey { x, y } = key;
+        let end = cell.symbol().width();
         let item = CacheItem::new(cell);
-        self.0.insert(key, item).inspect(|item| {
-            for x in (item.0.symbol().width()..width)
-                .filter_map(|x_offset| x_offset.try_into().ok())
-                .filter_map(|x_offset| key.x.checked_add(x_offset))
-            {
-                let key = CacheKey { x, ..key };
-                let _ = self.remove(&key);
-            }
-        })
+        let item = map.insert(key, item);
+        let start = item
+            .as_ref()
+            .map(|item| &item.0)
+            .map(|cell| cell.symbol().width())
+            .unwrap_or(1);
+
+        for right in (start..end)
+            .filter_map(|x_offset| x_offset.try_into().ok())
+            .filter_map(|x_offset| x.checked_add(x_offset))
+        {
+            let key = CacheKey::new(right, y);
+            let _ = self.remove(&key);
+        }
+
+        item
     }
 
     pub fn remove(&mut self, key: &CacheKey) -> Option<CacheItem> {
