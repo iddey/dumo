@@ -107,6 +107,7 @@ where
 
         let content = content.inspect(|&(x, y, cell)| {
             let key = CacheKey::new(x, y);
+            let end = cell.symbol().width();
             let mut cell = cell.clone();
 
             if HIDDEN {
@@ -114,11 +115,11 @@ where
             }
 
             if y == self.state.cursor_position.y {
-                for x in (0..cell.symbol().width())
+                for right in (0..end)
                     .filter_map(|x_offset| x_offset.try_into().ok())
                     .filter_map(|x_offset| x.checked_add(x_offset))
                 {
-                    if x == self.state.cursor_position.x {
+                    if right == self.state.cursor_position.x {
                         cursor_content.replace((x, y, cell.clone()));
                     }
                 }
