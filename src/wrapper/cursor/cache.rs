@@ -1,5 +1,3 @@
-use core::iter;
-
 use alloc::collections::BTreeMap;
 use alloc::collections::btree_map::Iter;
 use ratatui_core::buffer::Cell;
@@ -36,27 +34,28 @@ impl Cache {
         Self(BTreeMap::new())
     }
 
-    pub fn find(&self, position: Position) -> Option<(u16, u16, &Cell)> {
+    pub fn find(&self, Position { x, y }: Position) -> Option<(u16, u16, &Cell)> {
         use unicode_width::UnicodeWidthStr;
 
-        const SEARCH_WIDTH: usize = 2;
+        const MAX_END: usize = 2;
 
-        (0..SEARCH_WIDTH)
+        for left in (0..MAX_END)
             .filter_map(|x_offset| x_offset.try_into().ok())
-            .filter_map(|x_offset| position.x.checked_sub(x_offset))
-            .filter_map(|x| {
-                let key = CacheKey::new(x, position.y);
-                let item = self.get(&key);
-                item.map(|item| &item.0).and_then(|cell| {
-                    cell.symbol().width().try_into().ok().and_then(|x_offset| {
-                        x.checked_add(x_offset)
-                            .is_some_and(|x| x > position.x)
-                            .then_some((x, position.y, cell))
-                    })
-                })
-            })
-            .chain(iter::once((position.x, position.y, &Cell::EMPTY)))
-            .next()
+            .filter_map(|x_offset| x.checked_sub(x_offset))
+        {
+            let key = CacheKey::new(left, y);
+            let item = self.get(&key);
+            if let Some(cell) = item.map(|item| &item.0)
+                && let width = cell.symbol().width()
+                && let Some(x_offset) = width.try_into().ok()
+                && let Some(sum) = left.checked_add(x_offset)
+                && sum > x
+            {
+                return Some((left, y, cell));
+            }
+        }
+
+        Some((x, y, &Cell::EMPTY))
     }
 
     pub fn get(&self, key: &CacheKey) -> Option<&CacheItem> {
