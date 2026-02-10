@@ -37,5 +37,9 @@ alloc = ["defmt/alloc"]
 defmt = ["dep:defmt", "embedded-graphics/defmt", "mplusfonts/defmt"]
 
 [[example]]
+name = "cursor-1"
+required-features = ["alloc"]
+
+[[example]]
 name = "styles-1"
 required-features = ["alloc"]

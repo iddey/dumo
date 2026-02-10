@@ -76,5 +76,27 @@ effects work; however, it requires running the example.
 
 <picture>
     <source srcset="../assets/style-modifiers.webp" type="image/webp" width="480" height="480" />
-    <img src="../assets/style-modifiers.gif" alt="palettes" width="480" height="480" />
+    <img src="../assets/style-modifiers.gif" alt="styles-1" width="480" height="480" />
+</picture>
+
+## Cursor settings
+
+Usage: `cargo run --example cursor-1`
+
+### Instructions
+
+* Press the arrow keys or `H`, `J`, `K`, `L`, to move the cursor to one of the list boxes
+* Press `SPACE` or `RETURN` to use the item that the cursor is hovering over
+* Press `ESC` to quit
+
+Sometimes, terminal-style applications need to show a cursor, and Dumo can provide one for widgets,
+rendering the visual element of text entry.
+
+This example allows the user to customize the appearance of the cursor indicator, using the cursor
+itself in the process. There are also spans of styled text demonstrating what the cursor will look
+like when moved to those positions.
+
+<picture>
+    <source srcset="../assets/cursor-settings.webp" type="image/webp" width="480" height="480" />
+    <img src="../assets/cursor-settings.gif" alt="cursor-1" width="480" height="480" />
 </picture>
