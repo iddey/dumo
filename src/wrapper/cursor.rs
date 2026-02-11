@@ -143,15 +143,17 @@ where
             && (cursor_is_visible || cursor_hidden_toggled)
             && (cursor_blink_changed || previous_cursor_blink == Blinked(true))
         {
-            let cursor_content = self.state.cache.find(position);
+            let default_content = Some((position.x, position.y, &Cell::EMPTY));
+            let cursor_content = self.state.cache.find(position).or(default_content);
             self.backend.draw(cursor_content.into_iter())?;
         }
 
         if cursor_is_visible {
+            let default_content = Some((cursor_position.x, cursor_position.y, &Cell::EMPTY));
             let cursor_content = match cursor_content.as_ref() {
                 Some(&(x, y, ref cell)) => Some((x, y, cell)),
                 None if cursor_blink_changed || self.state.cursor_changed => {
-                    self.state.cache.find(cursor_position)
+                    self.state.cache.find(cursor_position).or(default_content)
                 }
                 None => None,
             };

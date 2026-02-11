@@ -56,7 +56,7 @@ impl Cache {
             }
         }
 
-        Some((x, y, &Cell::EMPTY))
+        None
     }
 
     pub fn get(&self, key: &CacheKey) -> Option<&CacheItem> {
