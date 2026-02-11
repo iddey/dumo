@@ -12,10 +12,11 @@ pub struct CacheKey {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
-pub struct CacheItem(#[defmt(Debug2Format)] pub Cell);
+pub struct CacheItem(#[cfg_attr(feature = "defmt", defmt(Debug2Format))] pub Cell);
 
 #[derive(Debug, Clone)]
-pub struct Cache(BTreeMap<CacheKey, CacheItem>);
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
+pub struct Cache(#[cfg_attr(feature = "defmt", defmt(Debug2Format))] BTreeMap<CacheKey, CacheItem>);
 
 impl CacheKey {
     pub const fn new(x: u16, y: u16) -> Self {
@@ -99,18 +100,5 @@ impl Cache {
 impl Default for Cache {
     fn default() -> Self {
         Self::new()
-    }
-}
-
-#[cfg(feature = "defmt")]
-impl defmt::Format for Cache {
-    fn format(&self, formatter: defmt::Formatter) {
-        defmt::write!(formatter, "{{");
-
-        for (key, item) in self.iter() {
-            defmt::write!(formatter, "{=?}: {=?}", key, item);
-        }
-
-        defmt::write!(formatter, "}}");
     }
 }

@@ -16,7 +16,7 @@ pub struct CacheKey {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct CacheItem {
     pub key: CacheKey,
-    #[defmt(Debug2Format)]
+    #[cfg_attr(feature = "defmt", defmt(Debug2Format))]
     pub cell: Cell,
     pub tickstamp: usize,
 }

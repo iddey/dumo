@@ -7,6 +7,7 @@ use crate::blink::Blink;
 
 /// Method of choosing colors for a cursor.
 #[derive(Debug, Clone, PartialEq, Eq, Copy)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum Colors {
     /// Render the cursor with [`DumoBackend::fg_reset`](crate::backend::DumoBackend::fg_reset) and
     /// [`DumoBackend::bg_reset`](crate::DumoBackend::bg_reset) swapped with each other to become
@@ -21,8 +22,10 @@ pub enum Colors {
     /// Render the cursor with custom foreground and background colors.
     Custom {
         /// The foreground color of the cursor.
+        #[cfg_attr(feature = "defmt", defmt(Debug2Format))]
         fg: Color,
         /// The background color of the cursor.
+        #[cfg_attr(feature = "defmt", defmt(Debug2Format))]
         bg: Color,
     },
 }
@@ -137,23 +140,5 @@ impl Cursor<'_> {
 impl Default for Cursor<'_> {
     fn default() -> Self {
         Self::const_default()
-    }
-}
-
-#[cfg(feature = "defmt")]
-impl defmt::Format for Colors {
-    fn format(&self, formatter: defmt::Formatter) {
-        match self {
-            Self::InvertedReset => defmt::write!(formatter, "InvertedReset"),
-            Self::ReversedReset => defmt::write!(formatter, "ReversedReset"),
-            Self::Custom { fg, bg } => {
-                defmt::write!(
-                    formatter,
-                    "Custom {{ fg: {:?}, bg: {:?} }}",
-                    defmt::Debug2Format(fg),
-                    defmt::Debug2Format(bg)
-                )
-            }
-        }
     }
 }
