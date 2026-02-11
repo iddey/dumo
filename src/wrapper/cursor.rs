@@ -18,7 +18,7 @@ use ratatui_core::style::Modifier;
 use crate::backend::DrawTargetBackend;
 use crate::blink::{Blink, Blinked, ControlBlinking, ControlCursorBlinking};
 use crate::cursor::{Colors, Cursor, Extent, Symbol};
-use crate::error::{AdvanceCursorBlinkingError, Error, SetCursorError};
+use crate::error::{AdvanceCursorBlinkingError, Error};
 
 use super::traits;
 use super::{WrapTrait, Wrapper};
@@ -103,6 +103,7 @@ where
 
         let cursor_blink = self.cursor.blink.get(self.state.ticks);
         let previous_cursor_blink = self.cursor.blink.get(self.state.ticks.wrapping_sub(1));
+        let cursor_position = self.get_cursor_position()?;
         let mut cursor_content = None;
 
         let content = content.inspect(|&(x, y, cell)| {
@@ -114,12 +115,12 @@ where
                 cell.modifier = cell.modifier.union(Modifier::HIDDEN)
             }
 
-            if y == self.state.cursor_position.y {
+            if y == cursor_position.y {
                 for right in (0..end)
                     .filter_map(|x_offset| x_offset.try_into().ok())
                     .filter_map(|x_offset| x.checked_add(x_offset))
                 {
-                    if right == self.state.cursor_position.x {
+                    if right == cursor_position.x {
                         cursor_content.replace((x, y, cell.clone()));
                     }
                 }
@@ -150,7 +151,7 @@ where
             let cursor_content = match cursor_content.as_ref() {
                 Some(&(x, y, ref cell)) => Some((x, y, cell)),
                 None if cursor_blink_changed || self.state.cursor_changed => {
-                    self.state.cache.find(self.state.cursor_position)
+                    self.state.cache.find(cursor_position)
                 }
                 None => None,
             };
@@ -193,6 +194,8 @@ where
     }
 
     fn hide_cursor(&mut self) -> Result<(), Self::Error> {
+        self.backend.hide_cursor()?;
+
         let changed = !self.state.cursor_hidden;
         if changed {
             self.state.cursor_hidden_toggled.get_or_insert(());
@@ -205,6 +208,8 @@ where
     }
 
     fn show_cursor(&mut self) -> Result<(), Self::Error> {
+        self.backend.show_cursor()?;
+
         let changed = self.state.cursor_hidden;
         if changed {
             self.state.cursor_hidden_toggled.get_or_insert(());
@@ -217,29 +222,23 @@ where
     }
 
     fn get_cursor_position(&mut self) -> Result<Position, Self::Error> {
-        let columns_rows = self.state.cursor_position;
-
-        Ok(columns_rows)
+        self.backend.get_cursor_position()
     }
 
     fn set_cursor_position<P: Into<Position>>(&mut self, position: P) -> Result<(), Self::Error> {
-        use SetCursorError::*;
-
         let position = position.into();
-        let columns_rows = self.size()?;
-        let [columns, rows] = [columns_rows.width, columns_rows.height];
+        let cursor_position = self.get_cursor_position()?;
 
-        let position = (position.x < columns && position.y < rows)
-            .then_some(position)
-            .ok_or(InvalidPosition)?;
+        self.backend.set_cursor_position(position)?;
 
-        let changed = position != self.state.cursor_position;
-        if let Some(position) = changed.then_some(self.state.cursor_position) {
-            self.state.cursor_position_changed.get_or_insert(position);
+        let changed = position != cursor_position;
+        if changed {
+            self.state
+                .cursor_position_changed
+                .get_or_insert(cursor_position);
         }
 
         self.state.cursor_changed |= changed;
-        self.state.cursor_position = position;
 
         Ok(())
     }

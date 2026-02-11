@@ -8,9 +8,7 @@ pub struct State {
     pub cache: Cache,
     pub ticks: usize,
     pub blinking: bool,
-    #[defmt(Debug2Format)]
-    pub cursor_position: Position,
-    #[defmt(Debug2Format)]
+    #[cfg_attr(feature = "defmt", defmt(Debug2Format))]
     pub cursor_position_changed: Option<Position>,
     pub cursor_hidden: bool,
     pub cursor_hidden_toggled: Option<()>,
@@ -23,7 +21,6 @@ impl State {
             cache: Cache::new(),
             ticks: 0,
             blinking: false,
-            cursor_position: Position::ORIGIN,
             cursor_position_changed: None,
             cursor_hidden: false,
             cursor_hidden_toggled: None,

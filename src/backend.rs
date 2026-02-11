@@ -1,12 +1,14 @@
 mod cell;
 mod rect;
 mod size;
+mod state;
 
 use core::fmt::Debug;
 
 use self::cell::CellSize;
 use self::rect::RectangleExt;
 use self::size::SizeExt;
+use self::state::State;
 use embedded_graphics::draw_target::{DrawTarget, DrawTargetExt};
 use embedded_graphics::geometry::{AnchorX, Point};
 use embedded_graphics::iterator::raw::RawDataSlice;
@@ -66,6 +68,8 @@ where
     /// Unicode standard and Ratatui. For example, `▲` and `▼` have graphics that require cropping,
     /// and the _x_-axis anchor point determines which sections to draw.
     pub anchor_x: AnchorX,
+    /// The values to carry across calls to different methods for a given frame, and across frames.
+    state: State,
 }
 
 /// Backend with a reference to a draw target.
@@ -207,6 +211,7 @@ where
             bg_reset: None,
             palette: D::Color::XTERM_256,
             anchor_x: AnchorX::Left,
+            state: State::new(),
         }
     }
 }
@@ -360,7 +365,7 @@ where
     }
 
     fn get_cursor_position(&mut self) -> Result<Position, Self::Error> {
-        let columns_rows = Position::ORIGIN;
+        let columns_rows = self.state.cursor_position;
 
         Ok(columns_rows)
     }
@@ -372,7 +377,7 @@ where
         let columns_rows = self.size()?;
         let [columns, rows] = [columns_rows.width, columns_rows.height];
 
-        let _ = (position.x < columns && position.y < rows)
+        self.state.cursor_position = (position.x < columns && position.y < rows)
             .then_some(position)
             .ok_or(InvalidPosition)?;
 
