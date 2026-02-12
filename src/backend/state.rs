@@ -1,3 +1,4 @@
+use embedded_graphics::primitives::Rectangle;
 use ratatui_core::layout::Position;
 
 #[derive(Debug, Clone, Copy)]
@@ -5,12 +6,14 @@ use ratatui_core::layout::Position;
 pub struct State {
     #[cfg_attr(feature = "defmt", defmt(Debug2Format))]
     pub cursor_position: Position,
+    pub cursor_coverage: Option<Rectangle>,
 }
 
 impl State {
     pub const fn new() -> Self {
         Self {
             cursor_position: Position::ORIGIN,
+            cursor_coverage: None,
         }
     }
 }

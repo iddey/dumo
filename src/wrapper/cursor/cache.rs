@@ -92,6 +92,14 @@ impl Cache {
         self.0.remove(key)
     }
 
+    pub fn retain(&mut self, f: impl Fn(CacheKey) -> bool) {
+        self.0.retain(|&key, _| f(key))
+    }
+
+    pub fn clear(&mut self) {
+        self.0.clear();
+    }
+
     pub fn iter(&self) -> Iter<'_, CacheKey, CacheItem> {
         self.0.iter()
     }

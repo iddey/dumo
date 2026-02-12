@@ -263,11 +263,68 @@ where
     }
 
     fn clear(&mut self) -> Result<(), Self::Error> {
-        self.backend.clear()
+        let cursor_blink = self.cursor.blink.get(self.state.ticks);
+        let cursor_position = self.get_cursor_position()?;
+        let cursor_is_visible = !self.state.cursor_hidden;
+
+        self.backend.clear()?;
+        self.state.cache.clear();
+
+        if cursor_is_visible && cursor_blink == Blinked(true) {
+            let default_content = Some((cursor_position.x, cursor_position.y, &Cell::EMPTY));
+            let cursor_content = self.state.cache.find(cursor_position).or(default_content);
+            self.backend.draw_cursor(
+                cursor_content.into_iter(),
+                self.cursor.colors,
+                self.cursor.extent,
+                self.cursor.symbol,
+            )?;
+        }
+
+        Ok(())
     }
 
     fn clear_region(&mut self, clear_type: ClearType) -> Result<(), Self::Error> {
-        self.backend.clear_region(clear_type)
+        let cursor_blink = self.cursor.blink.get(self.state.ticks);
+        let cursor_position = self.get_cursor_position()?;
+        let cursor_is_visible = !self.state.cursor_hidden;
+
+        let [x, y] = {
+            let Position { x, y } = cursor_position;
+            if let Some((x, y, _)) = self.state.cache.find(cursor_position) {
+                [x, y]
+            } else {
+                [x, y]
+            }
+        };
+
+        let cursor_is_below_or_right = |key: CacheKey| y > key.y || y == key.y && x > key.x;
+        let cursor_is_above_or_left = |key: CacheKey| y < key.y || y == key.y && x < key.x;
+        let cursor_is_above_or_below = |key: CacheKey| y != key.y;
+        let cursor_is_above_or_below_or_right = |key: CacheKey| y != key.y || x > key.x;
+
+        self.backend.clear_region(clear_type)?;
+
+        match clear_type {
+            ClearType::All => self.state.cache.clear(),
+            ClearType::AfterCursor => self.state.cache.retain(cursor_is_below_or_right),
+            ClearType::BeforeCursor => self.state.cache.retain(cursor_is_above_or_left),
+            ClearType::CurrentLine => self.state.cache.retain(cursor_is_above_or_below),
+            ClearType::UntilNewLine => self.state.cache.retain(cursor_is_above_or_below_or_right),
+        };
+
+        if cursor_is_visible && cursor_blink == Blinked(true) {
+            let default_content = Some((cursor_position.x, cursor_position.y, &Cell::EMPTY));
+            let cursor_content = self.state.cache.find(cursor_position).or(default_content);
+            self.backend.draw_cursor(
+                cursor_content.into_iter(),
+                self.cursor.colors,
+                self.cursor.extent,
+                self.cursor.symbol,
+            )?;
+        }
+
+        Ok(())
     }
 
     fn size(&self) -> Result<Size, Self::Error> {

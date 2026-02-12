@@ -392,21 +392,70 @@ where
         let background_color = self.bg_reset.unwrap_or_default();
 
         self.target.clear(background_color).map_err(Error::Clear)?;
+        self.state.cursor_coverage = None;
 
         Ok(())
     }
 
     fn clear_region(&mut self, clear_type: ClearType) -> Result<(), Self::Error> {
-        let background_color = self.bg_reset.unwrap_or_default();
+        use MeasureError::*;
 
-        let region = match clear_type {
-            ClearType::All => self.target.bounding_box(),
-            _ => Rectangle::zero(),
+        const ORIGIN: Point = Point::zero();
+
+        let background_color = self.bg_reset.unwrap_or_default();
+        let cursor_coverage = if let Some(cursor_coverage) = self.state.cursor_coverage {
+            cursor_coverage
+        } else {
+            let cell_size = self.font.cell_size();
+
+            let Position { x, y } = self.state.cursor_position;
+            let columns_rows = [x, y].map(Into::into).into();
+            let pixels = cell_size.checked_component_mul(columns_rows);
+            let [x_offset, y_offset] = pixels.ok_or(InvalidSize)?.into();
+            let top_left = Point {
+                x: ORIGIN.x.saturating_add_unsigned(x_offset),
+                y: ORIGIN.y.saturating_add_unsigned(y_offset),
+            };
+
+            Rectangle {
+                top_left,
+                size: cell_size,
+            }
         };
 
-        self.target
-            .fill_solid(&region, background_color)
-            .map_err(Error::Clear)?;
+        let top = cursor_coverage.top_left.y;
+        let bottom = top.saturating_add_unsigned(cursor_coverage.size.height);
+        let all_pixels = self.target.bounding_box();
+        let current_line = all_pixels.y_reduce(top, bottom);
+        let region_areas = match clear_type {
+            ClearType::All => &[all_pixels][..],
+            ClearType::AfterCursor => {
+                let below = all_pixels.below(&current_line);
+                let right = current_line.right_of(&cursor_coverage);
+
+                &[cursor_coverage, right, below]
+            }
+            ClearType::BeforeCursor => {
+                let above = all_pixels.above(&current_line);
+                let left = current_line.left_of(&cursor_coverage);
+
+                &[cursor_coverage, left, above]
+            }
+            ClearType::CurrentLine => &[current_line],
+            ClearType::UntilNewLine => {
+                let right = current_line.right_of(&cursor_coverage);
+
+                &[cursor_coverage, right]
+            }
+        };
+
+        for area in region_areas {
+            self.target
+                .fill_solid(area, background_color)
+                .map_err(Error::Clear)?;
+        }
+
+        self.state.cursor_coverage = None;
 
         Ok(())
     }
@@ -694,6 +743,8 @@ where
                     }
                 }
             }
+
+            self.state.cursor_coverage = Some(text_area);
         }
 
         Ok(())

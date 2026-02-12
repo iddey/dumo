@@ -8,7 +8,12 @@
 - Support for a terminal-style cursor position indicator with a configurable appearance. Requires
   the `alloc` feature to remain enabled. The cursor wrapper is added by calling the `with_cursor`
   method, which can be done before or after any other wrappers are added.
-- Fourth example that uses `embedded-graphics-simulator`: cursor settings, rendering dinamically.
+- Fourth example that uses `embedded-graphics-simulator`: cursor settings, rendering dynamically.
+
+### Changed
+
+- Missing implementations of the `clear` and `clear_region` methods; these are now functioning in
+  accordance with the semantics described in the clearing API contract.
 
 ## [0.1.0-beta.2] - 2026-01-31
 

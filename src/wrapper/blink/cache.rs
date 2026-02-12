@@ -4,6 +4,7 @@ use core::slice;
 
 use alloc::vec::Vec;
 use ratatui_core::buffer::Cell;
+use ratatui_core::layout::Position;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Copy)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
@@ -44,6 +45,41 @@ impl CacheItem {
 impl Cache {
     pub const fn new() -> Self {
         Self(Vec::new())
+    }
+
+    pub fn find(&self, Position { x, y }: Position) -> Option<(u16, u16, &Cell)> {
+        use unicode_width::UnicodeWidthStr;
+
+        const MAX_END: usize = 2;
+
+        for left in (0..MAX_END)
+            .filter_map(|x_offset| x_offset.try_into().ok())
+            .filter_map(|x_offset| x.checked_sub(x_offset))
+        {
+            let key = CacheKey::new(left, y);
+            let item = self.get(&key);
+            if let Some(cell) = item.map(|item| &item.cell)
+                && let width = cell.symbol().width()
+                && let Some(x_offset) = width.try_into().ok()
+                && let Some(sum) = left.checked_add(x_offset)
+                && sum > x
+            {
+                return Some((left, y, cell));
+            }
+        }
+
+        None
+    }
+
+    pub fn get(&self, key: &CacheKey) -> Option<&CacheItem> {
+        let Self(vec) = self;
+        if let Ok(index) = vec.binary_search_by_key(key, |e| e.key) {
+            let item = &vec[index];
+
+            Some(item)
+        } else {
+            None
+        }
     }
 
     pub fn insert_or_replace(
@@ -98,6 +134,14 @@ impl Cache {
         } else {
             None
         }
+    }
+
+    pub fn retain(&mut self, f: impl Fn(CacheKey) -> bool) {
+        self.0.retain(|item| f(item.key))
+    }
+
+    pub fn clear(&mut self) {
+        self.0.clear();
     }
 
     pub fn iter(&self) -> slice::Iter<'_, CacheItem> {

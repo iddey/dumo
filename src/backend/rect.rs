@@ -9,6 +9,9 @@ pub trait RectangleExt {
     /// Returns the rectangle's area that only has pixels to the right of the specified area.
     fn right_of(&self, other: &Self) -> Self;
 
+    /// Returns the rectangle's area that only has pixels above the specified area.
+    fn above(&self, other: &Self) -> Self;
+
     /// Returns the rectangle's area that only has pixels below the specified area.
     fn below(&self, other: &Self) -> Self;
 
@@ -40,6 +43,16 @@ impl RectangleExt for Rectangle {
         let width = width.try_into().unwrap_or_default();
         let size = Size::new(width, Default::default());
         let size = self.size.saturating_sub(size);
+
+        Self { top_left, size }
+    }
+
+    fn above(&self, other: &Self) -> Self {
+        let top_left = self.top_left;
+        let height = other.top_left.y.saturating_sub(self.top_left.y);
+        let height = height.try_into().unwrap_or_default();
+        let size = Size::new(self.size.width, height);
+        let size = self.size.component_min(size);
 
         Self { top_left, size }
     }
@@ -191,6 +204,59 @@ mod tests {
             Rectangle::new(Point::new(i32::MAX, i32::MAX), Size::new(u32::MAX, u32::MAX)),
             Rectangle::new(Point::new(i32::MIN, i32::MIN), Size::new(u32::MAX / 2, u32::MAX)),
             Rectangle::new(Point::new(i32::MAX, i32::MAX), Size::new(u32::MAX, u32::MAX)),
+    }
+
+    macro_rules! test_above {
+        (
+            $(
+                $fn_ident:ident, $self:expr, $other:expr, $expected:expr,
+            )*
+        ) => {
+            $(
+                #[test]
+                fn $fn_ident() {
+                    let result = $self.above(&$other);
+                    assert_eq!(result, $expected);
+                }
+            )*
+        }
+    }
+
+    test_above! {
+        above_800_for_1111_2222_3333_4444,
+            Rectangle::new(Point::new(1111, 2222), Size::new(3333, 4444)),
+            Rectangle::new(Point::new(2222, 800), Size::new(3333, 4444)),
+            Rectangle::new(Point::new(1111, 2222), Size::new(3333, 0)),
+
+        above_1600_for_1111_2222_3333_4444,
+            Rectangle::new(Point::new(1111, 2222), Size::new(3333, 4444)),
+            Rectangle::new(Point::new(2222, 1600), Size::new(3333, 4444)),
+            Rectangle::new(Point::new(1111, 2222), Size::new(3333, 0)),
+
+        above_3200_for_1111_2222_3333_4444,
+            Rectangle::new(Point::new(1111, 2222), Size::new(3333, 4444)),
+            Rectangle::new(Point::new(1111, 3200), Size::new(3333, 4444)),
+            Rectangle::new(Point::new(1111, 2222), Size::new(3333, 3200 - 2222)),
+
+        above_6400_for_1111_2222_3333_4444,
+            Rectangle::new(Point::new(1111, 2222), Size::new(3333, 4444)),
+            Rectangle::new(Point::new(1111, 6400), Size::new(3333, 4444)),
+            Rectangle::new(Point::new(1111, 2222), Size::new(3333, 6400 - 2222)),
+
+        above_0_for_0_0_0_0,
+            Rectangle::new(Point::new(0, 0), Size::new(0, 0)),
+            Rectangle::new(Point::new(0, 0), Size::new(0, 0)),
+            Rectangle::new(Point::new(0, 0), Size::new(0, 0)),
+
+        above_minus_1_for_min_min_max_max,
+            Rectangle::new(Point::new(i32::MIN, i32::MIN), Size::new(u32::MAX, u32::MAX)),
+            Rectangle::new(Point::new(i32::MIN, -1), Size::new(u32::MAX, u32::MAX)),
+            Rectangle::new(Point::new(i32::MIN, i32::MIN), Size::new(u32::MAX, u32::MAX / 2)),
+
+        above_minus_1_for_max_max_max_max,
+            Rectangle::new(Point::new(i32::MAX, i32::MAX), Size::new(u32::MAX, u32::MAX)),
+            Rectangle::new(Point::new(i32::MIN, -1), Size::new(u32::MAX, u32::MAX)),
+            Rectangle::new(Point::new(i32::MAX, i32::MAX), Size::new(u32::MAX, 0)),
     }
 
     macro_rules! test_below {
