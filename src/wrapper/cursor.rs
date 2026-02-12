@@ -138,6 +138,7 @@ where
         let cursor_is_visible = !self.state.cursor_hidden;
         let cursor_hidden_toggled = self.state.cursor_hidden_toggled.take().is_some();
         let cursor_blink_changed = cursor_blink != previous_cursor_blink;
+        let cursor_position_changed = self.state.cursor_position_changed.is_some();
 
         if let Some(position) = self.state.cursor_position_changed.take()
             && (cursor_is_visible || cursor_hidden_toggled)
@@ -152,7 +153,10 @@ where
             let default_content = Some((cursor_position.x, cursor_position.y, &Cell::EMPTY));
             let cursor_content = match cursor_content.as_ref() {
                 Some(&(x, y, ref cell)) => Some((x, y, cell)),
-                None if cursor_blink_changed || self.state.cursor_changed => {
+                None if cursor_blink_changed
+                    || cursor_position_changed
+                    || self.state.cursor_changed =>
+                {
                     self.state.cache.find(cursor_position).or(default_content)
                 }
                 None => None,
@@ -241,14 +245,17 @@ where
 
         self.backend.set_cursor_position(position)?;
 
-        let changed = position != cursor_position;
-        if changed {
-            self.state
-                .cursor_position_changed
-                .get_or_insert(cursor_position);
+        let is_update = position != cursor_position;
+        if is_update {
+            if let Some(cursor_position) = self.state.cursor_position_changed {
+                let is_revert = position == cursor_position;
+                if is_revert {
+                    self.state.cursor_position_changed.take();
+                }
+            } else {
+                self.state.cursor_position_changed.replace(cursor_position);
+            }
         }
-
-        self.state.cursor_changed |= changed;
 
         Ok(())
     }
