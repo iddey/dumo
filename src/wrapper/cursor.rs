@@ -136,6 +136,7 @@ where
         }
 
         let cursor_is_visible = !self.state.cursor_hidden;
+        let cursor_is_dirty = self.backend.take_dirty_cursor()?.is_some();
         let cursor_hidden_toggled = self.state.cursor_hidden_toggled.take().is_some();
         let cursor_blink_changed = cursor_blink != previous_cursor_blink;
         let cursor_position_changed = self.state.cursor_position_changed.is_some();
@@ -153,7 +154,8 @@ where
             let default_content = Some((cursor_position.x, cursor_position.y, &Cell::EMPTY));
             let cursor_content = match cursor_content.as_ref() {
                 Some(&(x, y, ref cell)) => Some((x, y, cell)),
-                None if cursor_blink_changed
+                None if cursor_is_dirty
+                    || cursor_blink_changed
                     || cursor_position_changed
                     || self.state.cursor_changed =>
                 {
@@ -315,6 +317,10 @@ where
         self.state.ticks = self.state.ticks.wrapping_add(ticks);
 
         self.backend.advance_blink_by(ticks)
+    }
+
+    fn take_dirty_cursor(&mut self) -> Result<Option<()>, Self::Error> {
+        self.backend.take_dirty_cursor()
     }
 }
 

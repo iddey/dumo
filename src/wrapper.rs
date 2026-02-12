@@ -97,6 +97,10 @@ where
     fn advance_blink_by(&mut self, ticks: usize) -> Result<(), Self::Error> {
         self.inner_mut().advance_blink_by(ticks)
     }
+
+    fn take_dirty_cursor(&mut self) -> Result<Option<()>, Self::Error> {
+        self.inner_mut().take_dirty_cursor()
+    }
 }
 
 /// Blanket implementation of the [`ConfigureBackend`] trait for function call passthrough.

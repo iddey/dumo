@@ -113,6 +113,10 @@ pub trait DrawTargetBackend<D: DrawTarget>: Backend {
     /// such features, calling [`advance_blink_by`](DrawTargetBackend::advance_blink_by) afterwards
     /// so that inner layers can do the same. The `ticks` are added to their internal frame counts.
     fn advance_blink_by(&mut self, ticks: usize) -> Result<(), Self::Error>;
+
+    /// Takes the unit from the backend or backend wrapper, indicating, when [`Some`], that an area
+    /// of the draw target with the cursor has been redrawn without the cursor being drawn over it.
+    fn take_dirty_cursor(&mut self) -> Result<Option<()>, Self::Error>;
 }
 
 /// Backend configuration retrieval and modification.
@@ -697,6 +701,10 @@ where
 
     fn advance_blink_by(&mut self, _: usize) -> Result<(), Self::Error> {
         Ok(())
+    }
+
+    fn take_dirty_cursor(&mut self) -> Result<Option<()>, Self::Error> {
+        Ok(None)
     }
 }
 

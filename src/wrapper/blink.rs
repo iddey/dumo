@@ -8,7 +8,7 @@ use core::fmt::Debug;
 use core::iter;
 use core::marker::PhantomData;
 
-use self::cache::CacheKey;
+use self::cache::{CacheItem, CacheKey};
 use self::state::State;
 use embedded_graphics::draw_target::DrawTarget;
 use ratatui_core::backend::{Backend, ClearType, WindowSize};
@@ -94,12 +94,15 @@ where
     where
         I: Iterator<Item = (u16, u16, &'z Cell)>,
     {
+        use unicode_width::UnicodeWidthStr;
+
         const SPARSE_BLINK: Modifier = Modifier::SLOW_BLINK.union(Modifier::RAPID_BLINK);
         const ALL_BLINK: Modifier = SPARSE_BLINK;
 
         let slow_blink = self.slow_blink.get(self.state.ticks);
         let rapid_blink = self.rapid_blink.get(self.state.ticks);
         let sparse_blink = Blinked(slow_blink.0 && rapid_blink.0);
+        let cursor_position = self.get_cursor_position()?;
 
         let previous_slow_blink = self.slow_blink.get(self.state.ticks.wrapping_sub(1));
         let previous_rapid_blink = self.rapid_blink.get(self.state.ticks.wrapping_sub(1));
@@ -127,10 +130,31 @@ where
         ] {
             let blink_changed = blink != previous_blink;
             let blink_content = self.state.cache.iter().filter_map(|item| {
-                let has_flags = blink_flags == item.cell.modifier.intersection(ALL_BLINK);
-                let has_changed = blink_changed || item.tickstamp == self.state.ticks;
+                let CacheItem {
+                    key: CacheKey { x, y },
+                    ref cell,
+                    tickstamp,
+                } = *item;
 
-                (has_flags && has_changed).then_some((item.key.x, item.key.y, &item.cell))
+                let is_relevant = blink_flags == cell.modifier.intersection(ALL_BLINK);
+                if is_relevant && (blink_changed || tickstamp == self.state.ticks) {
+                    let end = cell.symbol().width();
+
+                    if y == cursor_position.y {
+                        for right in (0..end)
+                            .filter_map(|x_offset| x_offset.try_into().ok())
+                            .filter_map(|x_offset| x.checked_add(x_offset))
+                        {
+                            if right == cursor_position.x {
+                                self.state.cursor_dirty.replace(());
+                            }
+                        }
+                    }
+
+                    Some((x, y, cell))
+                } else {
+                    None
+                }
             });
 
             if blink == Blinked(true) {
@@ -246,6 +270,17 @@ where
         self.state.ticks = self.state.ticks.wrapping_add(ticks);
 
         self.backend.advance_blink_by(ticks)
+    }
+
+    fn take_dirty_cursor(&mut self) -> Result<Option<()>, Self::Error> {
+        let units = [
+            self.backend.take_dirty_cursor()?,
+            self.state.cursor_dirty.take(),
+        ];
+
+        let unit = units.into_iter().flatten().next();
+
+        Ok(unit)
     }
 }
 

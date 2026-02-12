@@ -6,6 +6,7 @@ pub struct State {
     pub cache: Cache,
     pub ticks: usize,
     pub blinking: bool,
+    pub cursor_dirty: Option<()>,
 }
 
 impl State {
@@ -14,6 +15,7 @@ impl State {
             cache: Cache::new(),
             ticks: 0,
             blinking: false,
+            cursor_dirty: None,
         }
     }
 }
