@@ -196,29 +196,37 @@ where
     }
 
     fn hide_cursor(&mut self) -> Result<(), Self::Error> {
-        self.backend.hide_cursor()?;
+        let cursor_hidden = self.state.cursor_hidden;
 
-        let changed = !self.state.cursor_hidden;
-        if changed {
-            self.state.cursor_hidden_toggled.get_or_insert(());
-        }
-
-        self.state.cursor_changed |= changed;
         self.state.cursor_hidden = true;
+
+        let is_update = !cursor_hidden;
+        if is_update {
+            let is_revert = self.state.cursor_hidden_toggled.is_some();
+            if is_revert {
+                self.state.cursor_hidden_toggled.take();
+            } else {
+                self.state.cursor_hidden_toggled.replace(());
+            }
+        }
 
         Ok(())
     }
 
     fn show_cursor(&mut self) -> Result<(), Self::Error> {
-        self.backend.show_cursor()?;
+        let cursor_hidden = self.state.cursor_hidden;
 
-        let changed = self.state.cursor_hidden;
-        if changed {
-            self.state.cursor_hidden_toggled.get_or_insert(());
-        }
-
-        self.state.cursor_changed |= changed;
         self.state.cursor_hidden = false;
+
+        let is_update = cursor_hidden;
+        if is_update {
+            let is_revert = self.state.cursor_hidden_toggled.is_some();
+            if is_revert {
+                self.state.cursor_hidden_toggled.take();
+            } else {
+                self.state.cursor_hidden_toggled.replace(());
+            }
+        }
 
         Ok(())
     }
