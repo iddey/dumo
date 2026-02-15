@@ -1,6 +1,6 @@
 [package]
 name = "dumo"
-version = "0.1.0-beta.2"
+version = "0.1.0-beta.3"
 edition = "2024"
 description = "An embedded-graphics backend for Ratatui with an adjustable font size"
 documentation = "https://docs.rs/dumo"
@@ -28,13 +28,70 @@ chrono = { version = "0.4", features = ["clock"] }
 tui-big-text = "0.8.1"
 
 [features]
-default = ["alloc"]
+default = [
+    "alloc",
+    "font-latin",
+    "font-tui-block",
+    "font-tui-boxes",
+    "font-tui-dots-2x4",
+    "font-tui-rect-2x3",
+    "font-tui-rect-2x4",
+]
 
 # Enables the backend wrapper that buffers and redraws text that should blink.
 alloc = ["defmt/alloc"]
 
 # Allows the types in this crate and its dependencies to be formatted via defmt.
 defmt = ["dep:defmt", "embedded-graphics/defmt", "mplusfonts/defmt"]
+
+font-6x16 = []
+font-6x18 = []
+font-8x20 = []
+font-8x24 = []
+font-8x24-bold = []
+font-10x30 = []
+font-12x30 = []
+font-12x36 = []
+font-12x36-bold = []
+font-14x42 = []
+font-16x40 = []
+font-16x48 = []
+
+font-1-bit = []
+font-2-bits = []
+font-4-bits = []
+font-8-bits = []
+
+font-latin = []
+
+font-tui-block = []
+font-tui-boxes = []
+font-tui-dots-2x4 = []
+font-tui-rect-2x3 = []
+font-tui-rect-2x4 = []
+
+font-hiragana = []
+font-katakana = []
+
+[package.metadata.docs.rs]
+features = [
+    "font-6x16",
+    "font-6x18",
+    "font-8x20",
+    "font-8x24",
+    "font-8x24-bold",
+    "font-10x30",
+    "font-12x30",
+    "font-12x36",
+    "font-12x36-bold",
+    "font-14x42",
+    "font-16x40",
+    "font-16x48",
+    "font-1-bit",
+    "font-2-bits",
+    "font-4-bits",
+    "font-8-bits",
+]
 
 [[example]]
 name = "cursor-1"

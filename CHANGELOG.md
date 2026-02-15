@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [0.1.0-beta.3] - 2026-02-15
 
 ### Added
 
@@ -9,6 +9,10 @@
   the `alloc` feature to remain enabled. The cursor wrapper is added by calling the `with_cursor`
   method, which can be done before or after any other wrappers are added.
 - Fourth example that uses `embedded-graphics-simulator`: cursor settings, rendering dynamically.
+- Bitmap font configuration through features; this is for convenience, not having to parametrize
+  macro invocations with character ranges and strings to be added, however, it results in images
+  of glyphs being generated and included, even though these may never be used in any text that’s
+  rendered during runtime.
 
 ### Fixed
 
@@ -70,3 +74,4 @@
 [0.1.0-beta.0]: https://github.com/iddey/dumo/releases/tag/v0.1.0-beta.0
 [0.1.0-beta.1]: https://github.com/iddey/dumo/releases/tag/v0.1.0-beta.1
 [0.1.0-beta.2]: https://github.com/iddey/dumo/releases/tag/v0.1.0-beta.2
+[0.1.0-beta.3]: https://github.com/iddey/dumo/releases/tag/v0.1.0-beta.3
