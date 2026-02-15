@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- Calling `advance_cursor_blink_to` when the cursor is solid on. Since this means that the cursor
+  has _blinked_ indefinitely, advancing the cursor blink to the _blinked_ state now returns `Ok`.
+
 ## [0.1.0-beta.3] - 2026-02-15
 
 ### Added

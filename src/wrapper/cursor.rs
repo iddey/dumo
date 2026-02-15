@@ -2,6 +2,8 @@
 
 mod cache;
 mod state;
+#[cfg(test)]
+mod tests;
 mod wrap;
 
 use core::fmt::Debug;
@@ -467,7 +469,11 @@ where
                 }
                 Blinked(true) => {
                     if blink == 0 {
-                        Err(Error::AdvanceCursorBlinking(InvalidBlinked))
+                        if delay == 0 {
+                            Ok(self.state.ticks)
+                        } else {
+                            Err(Error::AdvanceCursorBlinking(InvalidBlinked))
+                        }
                     } else if let Some(period) = delay.checked_add(blink) {
                         let cycles = self.state.ticks.saturating_sub(delay).div_ceil(period);
                         let ticks = cycles.wrapping_mul(period).saturating_add(delay);
