@@ -327,32 +327,36 @@ where
                 let is_bold = cell.modifier.intersects(Modifier::BOLD);
                 if is_bold && let Some(font_bold) = self.font_bold {
                     renderer.font = font_bold;
-                    renderer
+
+                    let width = explicit_width.saturating_sub(inherent_width);
+                    let next_position = renderer
                         .draw_string(text, Point::zero(), BASELINE, &mut adapter)
                         .map_err(Error::Draw)?;
 
+                    renderer
+                        .draw_whitespace(width, next_position, BASELINE, &mut adapter)
+                        .map_err(Error::Draw)?;
+
                     let metrics = renderer.measure_string(text, crop_area.top_left, BASELINE);
-                    let left = clip_area.left_of(&metrics.bounding_box);
-                    let right = clip_area.indent_to(metrics.next_position.x);
-                    let middle = clip_area.left_of(&right).right_of(&left);
-                    let below = middle.below(&metrics.bounding_box);
+                    let below = clip_area.below(&metrics.bounding_box);
+                    let wide = clip_area.above(&below);
+                    let left = wide.left_of(&metrics.bounding_box);
+                    let right = metrics.next_position.x.saturating_add_unsigned(width);
+                    let right = wide.indent_to(right);
                     for area in [left, right, below] {
                         self.target
                             .fill_solid(&area, background_color)
                             .map_err(Error::Draw)?;
                     }
                 } else {
-                    renderer
+                    let width = explicit_width.saturating_sub(inherent_width);
+                    let next_position = renderer
                         .draw_string(text, Point::zero(), BASELINE, &mut adapter)
                         .map_err(Error::Draw)?;
 
-                    let left = clip_area.left_of(&crop_area);
-                    let right = clip_area.right_of(&crop_area);
-                    for area in [left, right] {
-                        self.target
-                            .fill_solid(&area, background_color)
-                            .map_err(Error::Draw)?;
-                    }
+                    renderer
+                        .draw_whitespace(width, next_position, BASELINE, &mut adapter)
+                        .map_err(Error::Draw)?;
                 }
             }
         }
@@ -715,32 +719,36 @@ where
                     && symbol == Symbol::UnderCursor
                 {
                     renderer.font = font_bold;
-                    renderer
+
+                    let width = explicit_width.saturating_sub(inherent_width);
+                    let next_position = renderer
                         .draw_string(text, Point::zero(), BASELINE, &mut adapter)
                         .map_err(Error::Draw)?;
 
+                    renderer
+                        .draw_whitespace(width, next_position, BASELINE, &mut adapter)
+                        .map_err(Error::Draw)?;
+
                     let metrics = renderer.measure_string(text, crop_area.top_left, BASELINE);
-                    let left = clip_area.left_of(&metrics.bounding_box);
-                    let right = clip_area.indent_to(metrics.next_position.x);
-                    let middle = clip_area.left_of(&right).right_of(&left);
-                    let below = middle.below(&metrics.bounding_box);
+                    let below = clip_area.below(&metrics.bounding_box);
+                    let wide = clip_area.above(&below);
+                    let left = wide.left_of(&metrics.bounding_box);
+                    let right = metrics.next_position.x.saturating_add_unsigned(width);
+                    let right = wide.indent_to(right);
                     for area in [left, right, below] {
                         self.target
                             .fill_solid(&area, background_color)
                             .map_err(Error::Draw)?;
                     }
                 } else {
-                    renderer
+                    let width = explicit_width.saturating_sub(inherent_width);
+                    let next_position = renderer
                         .draw_string(text, Point::zero(), BASELINE, &mut adapter)
                         .map_err(Error::Draw)?;
 
-                    let left = clip_area.left_of(&crop_area);
-                    let right = clip_area.right_of(&crop_area);
-                    for area in [left, right] {
-                        self.target
-                            .fill_solid(&area, background_color)
-                            .map_err(Error::Draw)?;
-                    }
+                    renderer
+                        .draw_whitespace(width, next_position, BASELINE, &mut adapter)
+                        .map_err(Error::Draw)?;
                 }
             }
 

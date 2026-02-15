@@ -10,6 +10,11 @@
   method, which can be done before or after any other wrappers are added.
 - Fourth example that uses `embedded-graphics-simulator`: cursor settings, rendering dynamically.
 
+### Fixed
+
+- Underline and strikethrough decorations, when the glyph for a double-width character is missing
+  in the bitmap font used, not being extended to the entire width of the cells.
+
 ### Changed
 
 - Missing implementations of the `clear` and `clear_region` methods; these are now functioning in
