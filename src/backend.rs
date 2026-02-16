@@ -357,6 +357,10 @@ where
                     renderer
                         .draw_whitespace(width, next_position, BASELINE, &mut adapter)
                         .map_err(Error::Draw)?;
+
+                    self.target
+                        .fill_solid(&clip_area.left_of(&crop_area), background_color)
+                        .map_err(Error::Draw)?;
                 }
             }
         }
@@ -748,6 +752,10 @@ where
 
                     renderer
                         .draw_whitespace(width, next_position, BASELINE, &mut adapter)
+                        .map_err(Error::Draw)?;
+
+                    self.target
+                        .fill_solid(&clip_area.left_of(&crop_area), background_color)
                         .map_err(Error::Draw)?;
                 }
             }

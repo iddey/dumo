@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- The area of the cell to the left of the glyph image, when the glyph for a double-width character
+  is missing, and the _x_-axis anchor point is not set to `Left`, not being cleared (as it used to
+  be prior to `0.1.0-beta.3`).
+
 ### Changed
 
 - Calling `advance_cursor_blink_to` when the cursor is solid on. Since this means that the cursor
