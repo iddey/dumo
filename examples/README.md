@@ -100,3 +100,27 @@ like when moved to those positions.
     <source srcset="../assets/cursor-settings.webp" type="image/webp" width="480" height="480" />
     <img src="../assets/cursor-settings.gif" alt="cursor-1" width="480" height="480" />
 </picture>
+
+## Cursor example #2 - Glyphset viewer
+
+Usage: `cargo run --example cursor-2 --features="font-8x24 font-8x24-bold font-4-bits"`
+
+### Instructions
+
+* Press the arrow keys or `H`, `J`, `K`, `L`, to move the cursor and scroll the table
+* Press `SPACE` or `RETURN` to cycle through sets of glyphs
+* Press `TAB` to switch between regular and bold fonts
+* Press `ESC` to quit
+
+Renders tables of glyph subsets that correspond to the features that are enabled by default, which
+allows for visual inspection of the bitmap fonts, in this case, `font-8x24` and `font-8x24-bold`.
+
+The tables contain special textual data, which are also used to populate the bitmap fonts with the
+characters that they ought to include in their character sets. The tables are exhaustive, all base
+characters — supported by the underlying TrueType font or backed by vector graphics — are added to
+their respective subsets.
+
+<picture>
+    <source srcset="../assets/cursor-glyphset.webp" type="image/webp" width="480" height="480" />
+    <img src="../assets/cursor-glyphset.gif" alt="cursor-2" width="480" height="480" />
+</picture>

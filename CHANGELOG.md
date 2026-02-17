@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Fifth example that uses `embedded-graphics-simulator`: cursor example #2, demonstrating glyphs.
+
 ### Fixed
 
 - The area of the cell to the left of the glyph image, when the glyph for a double-width character

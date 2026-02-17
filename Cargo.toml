@@ -98,5 +98,20 @@ name = "cursor-1"
 required-features = ["alloc"]
 
 [[example]]
+name = "cursor-2"
+required-features = [
+    "alloc",
+    "font-8x24",
+    "font-8x24-bold",
+    "font-4-bits",
+    "font-latin",
+    "font-tui-block",
+    "font-tui-boxes",
+    "font-tui-dots-2x4",
+    "font-tui-rect-2x3",
+    "font-tui-rect-2x4",
+]
+
+[[example]]
 name = "styles-1"
 required-features = ["alloc"]
