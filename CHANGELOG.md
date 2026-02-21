@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [0.1.0-beta.4] - 2026-02-21
 
 ### Added
 
@@ -17,6 +17,8 @@
 
 - Calling `advance_cursor_blink_to` when the cursor is solid on. Since this means that the cursor
   has _blinked_ indefinitely, advancing the cursor blink to the _blinked_ state now returns `Ok`.
+- Upgrade dependencies: `embedded-graphics 0.8.2` and `mplusfonts 0.3.3`.
+- Upgrade dev-dependencies: `tui-big-text 0.8.2`.
 
 ## [0.1.0-beta.3] - 2026-02-15
 
@@ -93,3 +95,4 @@
 [0.1.0-beta.1]: https://github.com/iddey/dumo/releases/tag/v0.1.0-beta.1
 [0.1.0-beta.2]: https://github.com/iddey/dumo/releases/tag/v0.1.0-beta.2
 [0.1.0-beta.3]: https://github.com/iddey/dumo/releases/tag/v0.1.0-beta.3
+[0.1.0-beta.4]: https://github.com/iddey/dumo/releases/tag/v0.1.0-beta.4
