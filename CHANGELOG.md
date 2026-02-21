@@ -5,6 +5,7 @@
 ### Added
 
 - Fifth example that uses `embedded-graphics-simulator`: cursor example #2, demonstrating glyphs.
+- First example that runs on a development board and uses `esp-hal`: The `ratatui 0.30.0` banner.
 
 ### Fixed
 

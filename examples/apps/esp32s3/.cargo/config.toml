@@ -1,0 +1,22 @@
+[target.xtensa-esp32s3-none-elf]
+runner = "espflash flash --monitor --chip esp32s3"
+rustflags = [
+    "-C", "link-arg=-nostartfiles",
+    "-C", "link-arg=-Tlinkall.x",
+]
+
+[build]
+target = "xtensa-esp32s3-none-elf"
+
+[unstable]
+build-std = ["core", "alloc"]
+
+[profile.dev]
+opt-level = "z"
+debug = "full"
+lto = "fat"
+
+[profile.release]
+opt-level = "z"
+debug = "none"
+lto = "fat"

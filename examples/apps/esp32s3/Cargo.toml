@@ -1,0 +1,25 @@
+[package]
+name = "dumo-examples-esp32s3"
+version = "0.1.0"
+edition = "2024"
+readme.workspace = true
+repository.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+dumo = { workspace = true, features = ["font-10x30", "font-4-bits"] }
+embassy-executor.workspace = true
+embassy-futures.workspace = true
+embassy-sync.workspace = true
+embassy-time.workspace = true
+embedded-graphics.workspace = true
+esp-alloc = { workspace = true, features = ["esp32s3"] }
+esp-bootloader-esp-idf = { workspace = true, features = ["esp32s3"] }
+esp-hal = { workspace = true, features = ["esp32s3"] }
+esp-rtos = { workspace = true, features = ["esp32s3"] }
+heapless = { workspace = true, features = ["portable-atomic-critical-section"] }
+mipidsi.workspace = true
+panic-halt.workspace = true
+ratatui.workspace = true
+static_cell.workspace = true
