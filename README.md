@@ -1,6 +1,6 @@
 <picture>
-    <source srcset="../assets/dumo-0.1@3x.webp" type="image/webp" width="400" height="185" />
-    <img align="right" src="../assets/dumo-0.1@3x.png" alt="banner-1" width="400" height="185" />
+    <source srcset="assets/dumo-0.1@3x.webp" type="image/webp" width="400" height="185" />
+    <img align="right" src="assets/dumo-0.1@3x.png" alt="banner-1" width="400" height="185" />
 </picture>
 
 # Dumo
