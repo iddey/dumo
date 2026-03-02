@@ -1,0 +1,21 @@
+[target.thumbv8m.main-none-eabihf]
+linker = "flip-link"
+runner = "picotool load --update --verify --execute --type elf"
+rustflags = [
+    "-C", "link-arg=--nmagic",
+    "-C", "link-arg=-Tlink.x",
+    "-C", "target-cpu=cortex-m33",
+]
+
+[build]
+target = "thumbv8m.main-none-eabihf"
+
+[profile.dev]
+opt-level = "z"
+debug = "full"
+lto = "fat"
+
+[profile.release]
+opt-level = "z"
+debug = "none"
+lto = "fat"

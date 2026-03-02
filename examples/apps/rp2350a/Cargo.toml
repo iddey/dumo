@@ -1,0 +1,28 @@
+[package]
+name = "dumo-examples-rp2350a"
+version = "0.1.0"
+edition = "2024"
+readme.workspace = true
+repository.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+cortex-m-rt.workspace = true
+dumo = { workspace = true, features = ["font-6x16", "font-4-bits"] }
+embassy-embedded-hal.workspace = true
+embassy-executor = { workspace = true, features = ["arch-cortex-m"] }
+embassy-futures.workspace = true
+embassy-rp = { workspace = true, features = ["critical-section-impl", "rp235xa"] }
+embassy-sync.workspace = true
+embassy-time.workspace = true
+embedded-alloc.workspace = true
+embedded-graphics.workspace = true
+mipidsi.workspace = true
+panic-halt.workspace = true
+ratatui.workspace = true
+static_cell.workspace = true
+strum.workspace = true
+
+[build-dependencies]
+fs_extra = "1.3.0"

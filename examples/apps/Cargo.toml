@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["esp32s3"]
+members = ["esp32s3", "rp2350a"]
 
 [workspace.package]
 readme = true
@@ -9,11 +9,15 @@ license = "MIT OR Apache-2.0"
 publish = false
 
 [workspace.dependencies]
+cortex-m-rt = "0.7.5"
 dumo.path = "../.."
+embassy-embedded-hal = "0.5.0"
 embassy-executor = { version = "0.9.1", features = ["executor-thread"] }
 embassy-futures = "0.1.2"
 embassy-sync = "0.7.2"
+embassy-rp = { version = "0.9.0", features = ["time-driver"] }
 embassy-time = "0.5.0"
+embedded-alloc = "0.7.0"
 embedded-graphics = "0.8.2"
 esp-alloc = "0.9.0"
 esp-bootloader-esp-idf = "0.4.0"
@@ -28,3 +32,8 @@ static_cell = "2.1.1"
 [workspace.dependencies.ratatui]
 version = "0.30.0"
 default-features = false
+
+[workspace.dependencies.strum]
+version = "0.28.0"
+default-features = false
+features = ["derive"]
