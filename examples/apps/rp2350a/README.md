@@ -25,6 +25,22 @@ Binaries are uploaded via USB in bootloader mode. Usage: `cargo run --release --
 [`Tabs`]: https://docs.rs/ratatui/latest/ratatui/widgets/struct.Tabs.html
 [`FONT_6X16_4_BITS`]: https://docs.rs/dumo/latest/dumo/fonts/constant.FONT_6X16_4_BITS.html
 
+- `epd-calendar` - A single screen that is built using Ratatui's own widgets as well as third-party
+  ones: [`List`], [`calendar::Monthly`], and [`tui_big_text::BigText`].
+
+  The display panel with its SSD1619A controller is only able to show black and white pixels, so in
+  this example, the [`FONT_12X30_1_BIT`] bitmap font, which does not have anti-aliasing, is used to
+  reduce the amount of storage space taken up by pixel information.
+
+  *WeAct Studio 4.2″ EPD module*
+
+  <img src="../assets/epd-calendar.gif" alt="epd-calendar" width="640" height="480" />
+
+[`List`]: https://docs.rs/ratatui/latest/ratatui/widgets/struct.List.html
+[`calendar::Monthly`]: https://docs.rs/ratatui/latest/ratatui/widgets/calendar/struct.Monthly.html
+[`tui_big_text::BigText`]: https://docs.rs/tui-big-text/latest/tui_big_text/struct.BigText.html
+[`FONT_12X30_1_BIT`]: https://docs.rs/dumo/latest/dumo/fonts/constant.FONT_12X30_1_BIT.html
+
 ## Minimum supported Rust version
 
 The minimum supported Rust version for `mplusfonts-examples-rp2350a` is `1.89`.

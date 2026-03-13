@@ -8,8 +8,9 @@ license.workspace = true
 publish.workspace = true
 
 [dependencies]
+cortex-m.workspace = true
 cortex-m-rt.workspace = true
-dumo = { workspace = true, features = ["font-6x16", "font-4-bits"] }
+dumo = { workspace = true, features = ["font-6x16", "font-12x30", "font-1-bit", "font-4-bits"] }
 embassy-embedded-hal.workspace = true
 embassy-executor = { workspace = true, features = ["arch-cortex-m"] }
 embassy-futures.workspace = true
@@ -18,11 +19,15 @@ embassy-sync.workspace = true
 embassy-time.workspace = true
 embedded-alloc.workspace = true
 embedded-graphics.workspace = true
+embedded-hal.workspace = true
 mipidsi.workspace = true
 panic-halt.workspace = true
-ratatui.workspace = true
+ratatui = { workspace = true, features = ["widget-calendar"] }
+ssd1619a.workspace = true
 static_cell.workspace = true
 strum.workspace = true
+time.workspace = true
+tui-big-text.workspace = true
 
 [build-dependencies]
 fs_extra = "1.3.0"

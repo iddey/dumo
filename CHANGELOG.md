@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- Two examples that run on an `rp2350a`: `ratatui` tabs and `ratatui` calendar with `tui-big-text`.
+- An introduction to the `dumo` crate and its font features.
+
 ## [0.1.0-beta.4] - 2026-02-21
 
 ### Added
