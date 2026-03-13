@@ -7,6 +7,11 @@
 - Two examples that run on an `rp2350a`: `ratatui` tabs and `ratatui` calendar with `tui-big-text`.
 - An introduction to the `dumo` crate and its font features.
 
+### Fixed
+
+- Enabling `alloc` no longer enables the `defmt` feature; however, if `defmt` is enabled, then it
+  does enable the `defmt/alloc` feature.
+
 ## [0.1.0-beta.4] - 2026-02-21
 
 ### Added
