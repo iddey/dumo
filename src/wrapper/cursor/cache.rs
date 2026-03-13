@@ -1,5 +1,4 @@
 use alloc::collections::BTreeMap;
-use alloc::collections::btree_map::Iter;
 use ratatui_core::buffer::Cell;
 use ratatui_core::layout::Position;
 
@@ -98,10 +97,6 @@ impl Cache {
 
     pub fn clear(&mut self) {
         self.0.clear();
-    }
-
-    pub fn iter(&self) -> Iter<'_, CacheKey, CacheItem> {
-        self.0.iter()
     }
 }
 
