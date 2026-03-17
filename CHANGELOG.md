@@ -6,6 +6,7 @@
 
 - Two examples that run on an `rp2350a`: `ratatui` tabs and `ratatui` calendar with `tui-big-text`.
 - An introduction to the `dumo` crate and its font features.
+- A guide on how to get started.
 
 ### Fixed
 

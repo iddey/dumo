@@ -40,9 +40,9 @@ There are two additional bold presets for the 8×24 and 12×36 bitmap fonts, mak
 
 Although it would be possible, there are no presets for cell sizes smaller than 6×16 pixels because
 `mplusfonts` creates glyph images from TrueType fonts. The designer of these fonts, Coji Morishita,
-has done an excellent job aligning glyph outlines with the pixel grid at the font sizes used in the
-presets, but if you have less pixels to work with or would prefer another font, a pixel font, check
-out [`mousefood`], the Ratatui backend for `embedded-graphics`.
+has done an excellent job aligning glyph outlines with the pixel grid at the font size/width values
+used in the presets, but if you have less pixels to work with or would prefer another font, a pixel
+font, check out [`mousefood`], the première Ratatui backend for `embedded-graphics`.
 
 While pixel fonts are optimized for 1 bit per pixel and take up less storage space, `dumo` supports
 1, 2, 4, and 8 bits per pixel in its glyph images; therefore, font anti-aliasing is possible if the
@@ -51,14 +51,19 @@ as shown in the calendar example, 1 bit per pixel is supported, the uneven line 
 in the letter **R** for Ratatui — is unavoidable, given that the current edition of **M<sup>+</sup>
 FONTS** is not a per-pixel-drawn bitmap font.
 
-Bit depth aside, `dumo` makes it possible to reduce the amount flash memory that a bitmap font uses
+Bit depth aside, there’s an option to reduce the amount of flash memory that a bitmap font occupies
 either by not enabling the subsets of glyphs that are not required — for example, Braille patterns,
 which are one type of [`Marker`] in Ratatui and a popular choice of characters for a [`throbber`] —
 or through the use of a macro in the [`dumo`] crate root, bypassing the [`fonts`] module and adding
-character ranges and strings that need to be made renderable, using one of the presets. The presets
-can also be replaced with a call to the [`mpluscode!`] macro; however, the font weights used in the
-presets have been pre-calculated, balancing out the left and right halves of glyph images such that
-anti-aliasing artifacts would appear symmetrical.
+character ranges and strings that need to be made renderable. The font widths used as parameters to
+`mpluscode!` have been pre-calculated, balancing out the left and right halves of glyph images such
+that anti-aliasing artifacts would appear symmetrical; therefore, bypassing also the `font_*` macro
+set and calling `mpluscode!` or even [`mplusfonts::mplus!`] is only recommended when the predefined
+[`BitmapFont`] instances are inadequate.
+
+## Getting started
+
+See [USAGE](USAGE.md), which is also available as crate-level documentation: <https://docs.rs/dumo>
 
 [`embedded-graphics`]: https://crates.io/crates/embedded-graphics
 [`ratatui`]: https://crates.io/crates/ratatui/0.30.0
@@ -71,6 +76,8 @@ anti-aliasing artifacts would appear symmetrical.
 [`Marker`]: https://docs.rs/ratatui/latest/ratatui/prelude/symbols/enum.Marker.html
 [`throbber`]: https://docs.rs/throbber-widgets-tui/latest/throbber_widgets_tui/index.html
 [`mpluscode!`]: https://docs.rs/dumo/latest/dumo/macro.mpluscode.html
+[`mplusfonts::mplus!`]: https://docs.rs/mplusfonts/latest/mplusfonts/macro.mplus.html
+[`BitmapFont`]: https://docs.rs/mplusfonts/latest/mplusfonts/struct.BitmapFont.html
 
 ## Minimum supported Rust version
 
