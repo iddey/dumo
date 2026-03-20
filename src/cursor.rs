@@ -94,6 +94,14 @@ impl Cursor<'_> {
     /// Creates a new cursor that is solid on, uses the [`Reset`](Color::Reset) colors swapped with
     /// one another, drawing to the entire area of the cell or cells. This is default configuration
     /// for a cursor, and it also renders the symbol found at the position of the cursor.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use dumo::cursor::Cursor;
+    ///
+    /// let default_cursor = Cursor::const_default();
+    /// ```
     pub const fn const_default() -> Self {
         Self {
             blink: Blink::with_period(0),
@@ -104,12 +112,31 @@ impl Cursor<'_> {
     }
 
     /// Sets the blinking animation to have a single frame that always shows the cursor being on.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use dumo::blink::Blink;
+    /// use dumo::cursor::Cursor;
+    ///
+    /// let cursor_blink = Cursor::default().blink(Blink::with_period(10));
+    /// let cursor_solid_on = cursor_blink.solid_on();
+    /// ```
     #[must_use = "method consumes the cursor and returns one with the new settings"]
     pub const fn solid_on(self) -> Self {
         self.blink(Blink::with_period(0))
     }
 
     /// Sets the blink animation cycle for the cursor.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use dumo::blink::Blink;
+    /// use dumo::cursor::Cursor;
+    ///
+    /// let cursor_blink = Cursor::default().blink(Blink::with_period(10));
+    /// ```
     #[must_use = "method consumes the cursor and returns one with the new settings"]
     pub const fn blink(mut self, blink: Blink) -> Self {
         self.blink = blink;
@@ -117,6 +144,18 @@ impl Cursor<'_> {
     }
 
     /// Sets the method used by the cursor for choosing colors.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use dumo::cursor::{Colors, Cursor};
+    /// use ratatui::style::Color;
+    ///
+    /// let cursor_white = Cursor::default().colors(Colors::Custom {
+    ///     fg: Color::Black,
+    ///     bg: Color::White,
+    /// });
+    /// ```
     #[must_use = "method consumes the cursor and returns one with the new settings"]
     pub const fn colors(mut self, colors: Colors) -> Self {
         self.colors = colors;
@@ -124,6 +163,16 @@ impl Cursor<'_> {
     }
 
     /// Sets the shape that represents the cursor inside of the cell area.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use dumo::cursor::{Cursor, Extent};
+    ///
+    /// let cursor_bar = Cursor::default().extent(Extent::VerticalBar { width: 2 });
+    /// let cursor_line = cursor_bar.extent(Extent::Underline { height: 2 });
+    /// let cursor_block = cursor_line.extent(Extent::FullBlock);
+    /// ```
     #[must_use = "method consumes the cursor and returns one with the new settings"]
     pub const fn extent(mut self, extent: Extent) -> Self {
         self.extent = extent;
@@ -131,6 +180,14 @@ impl Cursor<'_> {
     }
 
     /// Sets the source of the content that the cursor uses to symbolize itself.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use dumo::cursor::{Cursor, Symbol};
+    ///
+    /// let cursor_checker = Cursor::default().symbol(Symbol::Custom("🮕🮕"));
+    /// ```
     #[must_use = "method consumes the cursor and returns one with the new settings"]
     pub const fn symbol<'a>(self, symbol: Symbol<'a>) -> Cursor<'a> {
         Cursor { symbol, ..self }

@@ -32,12 +32,89 @@ pub trait Wrapper {
     type Inner;
 
     /// Returns a reference to the inner object.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[cfg(not(all(feature = "alloc", feature = "font-8x24", feature = "font-4-bits")))]
+    /// # {
+    /// #     compile_error!("doc-test is missing required features");
+    /// # }
+    /// #
+    /// use dumo::blink::Blink;
+    /// use dumo::fonts::*;
+    /// use dumo::{BlinkWrapper, DumoBackend, Wrapper};
+    /// # use embedded_graphics::mock_display::MockDisplay;
+    /// # use embedded_graphics::pixelcolor::Rgb565;
+    ///
+    /// # let mut display: MockDisplay<Rgb565> = MockDisplay::new();
+    /// let wrapper = BlinkWrapper::new(
+    ///     DumoBackend::new(&mut display, &FONT_8X24_4_BITS),
+    ///     Blink::with_period(16),
+    ///     Blink::with_period(8),
+    /// );
+    ///
+    /// let backend = wrapper.inner();
+    /// ```
     fn inner(&self) -> &Self::Inner;
 
     /// Returns a reference with exclusive access to the inner object.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[cfg(not(all(feature = "alloc", feature = "font-8x24", feature = "font-4-bits")))]
+    /// # {
+    /// #     compile_error!("doc-test is missing required features");
+    /// # }
+    /// #
+    /// use dumo::blink::Blink;
+    /// use dumo::cursor::{Colors, Cursor, Extent};
+    /// use dumo::fonts::*;
+    /// use dumo::{CursorWrapper, DumoBackend, Wrapper};
+    /// # use embedded_graphics::mock_display::MockDisplay;
+    /// # use embedded_graphics::pixelcolor::Rgb565;
+    ///
+    /// # let mut display: MockDisplay<Rgb565> = MockDisplay::new();
+    /// let mut wrapper = CursorWrapper::new(
+    ///     DumoBackend::new(&mut display, &FONT_8X24_4_BITS),
+    ///     Cursor::default()
+    ///         .blink(Blink::with_period(10))
+    ///         .colors(Colors::InvertedReset)
+    ///         .extent(Extent::Underline { height: 2 }),
+    /// );
+    ///
+    /// let backend = wrapper.inner_mut();
+    /// ```
     fn inner_mut(&mut self) -> &mut Self::Inner;
 
     /// Consumes the wrapper, returning the inner object.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[cfg(not(all(feature = "font-8x24", feature = "font-4-bits")))]
+    /// # {
+    /// #     compile_error!("doc-test is missing required features");
+    /// # }
+    /// #
+    /// use dumo::fonts::*;
+    /// use dumo::{DumoBackend, FlushWrapper, Wrapper};
+    /// # use embedded_graphics::mock_display::MockDisplay;
+    /// # use embedded_graphics::pixelcolor::Rgb565;
+    ///
+    /// # let mut display: MockDisplay<Rgb565> = MockDisplay::new();
+    /// let wrapper = FlushWrapper::new(
+    ///     DumoBackend::new(&mut display, &FONT_8X24_4_BITS),
+    ///     |display| {
+    ///         // ...
+    ///
+    ///         Ok(())
+    ///     },
+    /// );
+    ///
+    /// let backend = wrapper.into_inner();
+    /// ```
     fn into_inner(self) -> Self::Inner;
 }
 

@@ -34,6 +34,25 @@ macro_rules! impl_with_blink {
         ///
         /// [`Backend::draw`]: ratatui_core::backend::Backend::draw
         /// [`Terminal`]: ratatui_core::terminal::Terminal
+        ///
+        /// # Examples
+        ///
+        /// ```
+        /// # #[cfg(not(all(feature = "alloc", feature = "font-8x24", feature = "font-4-bits")))]
+        /// # {
+        /// #     compile_error!("doc-test is missing required features");
+        /// # }
+        /// #
+        /// use dumo::DumoBackend;
+        /// use dumo::blink::Blink;
+        /// use dumo::fonts::*;
+        /// # use embedded_graphics::mock_display::MockDisplay;
+        /// # use embedded_graphics::pixelcolor::Rgb565;
+        ///
+        /// # let mut display: MockDisplay<Rgb565> = MockDisplay::new();
+        /// let backend = DumoBackend::new(&mut display, &FONT_8X24_4_BITS)
+        ///     .with_blink(Blink::with_period(16), Blink::with_period(8));
+        /// ```
         pub fn with_blink(
             #[allow(unused_mut)] mut $self_ident,
             slow_blink: Blink,
@@ -65,6 +84,30 @@ macro_rules! impl_with_cursor {
         /// [`Backend::set_cursor_position`]: ratatui_core::backend::Backend::set_cursor_position
         /// [`Backend::show_cursor`]: ratatui_core::backend::Backend::show_cursor
         /// [`Terminal`]: ratatui_core::terminal::Terminal
+        ///
+        /// # Examples
+        ///
+        /// ```
+        /// # #[cfg(not(all(feature = "alloc", feature = "font-8x24", feature = "font-4-bits")))]
+        /// # {
+        /// #     compile_error!("doc-test is missing required features");
+        /// # }
+        /// #
+        /// use dumo::DumoBackend;
+        /// use dumo::blink::Blink;
+        /// use dumo::cursor::{Colors, Cursor, Extent};
+        /// use dumo::fonts::*;
+        /// # use embedded_graphics::mock_display::MockDisplay;
+        /// # use embedded_graphics::pixelcolor::Rgb565;
+        ///
+        /// # let mut display: MockDisplay<Rgb565> = MockDisplay::new();
+        /// let backend = DumoBackend::new(&mut display, &FONT_8X24_4_BITS).with_cursor(
+        ///     Cursor::default()
+        ///         .blink(Blink::with_period(10))
+        ///         .colors(Colors::InvertedReset)
+        ///         .extent(Extent::Underline { height: 2 }),
+        /// );
+        /// ```
         pub fn with_cursor<$lifetime>(
             #[allow(unused_mut)] mut $self_ident,
             cursor: Cursor<$lifetime>,
@@ -94,6 +137,27 @@ macro_rules! impl_with_flush {
         ///
         /// [`Backend::flush`]: ratatui_core::backend::Backend::flush
         /// [`Terminal`]: ratatui_core::terminal::Terminal
+        ///
+        /// # Examples
+        ///
+        /// ```
+        /// # #[cfg(not(all(feature = "font-8x24", feature = "font-4-bits")))]
+        /// # {
+        /// #     compile_error!("doc-test is missing required features");
+        /// # }
+        /// #
+        /// use dumo::DumoBackend;
+        /// use dumo::fonts::*;
+        /// # use embedded_graphics::mock_display::MockDisplay;
+        /// # use embedded_graphics::pixelcolor::Rgb565;
+        ///
+        /// # let mut display: MockDisplay<Rgb565> = MockDisplay::new();
+        /// let backend = DumoBackend::new(&mut display, &FONT_8X24_4_BITS).with_flush(|display| {
+        ///     // ...
+        ///
+        ///     Ok(())
+        /// });
+        /// ```
         pub const fn with_flush<F>(self, flush_fn: F) -> FlushWrapper<Self, F, D>
         where
             F: FnMut(&mut D) -> Result<(), D::Error>,

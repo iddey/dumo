@@ -1,6 +1,6 @@
 [package]
 name = "dumo"
-version = "0.1.0-beta.4"
+version = "0.1.0"
 edition = "2024"
 description = "An embedded-graphics backend for Ratatui with an adjustable font size"
 documentation = "https://docs.rs/dumo"
@@ -44,22 +44,52 @@ alloc = ["defmt?/alloc"]
 # Allows the types in this crate and its dependencies to be formatted via defmt.
 defmt = ["dep:defmt", "embedded-graphics/defmt", "mplusfonts/defmt"]
 
+# Enables bitmap fonts with a cell size of 6 by 16 pixels. Complements bit depth features.
 font-6x16 = []
+
+# Enables bitmap fonts with a cell size of 6 by 18 pixels. Complements bit depth features.
 font-6x18 = []
+
+# Enables bitmap fonts with a cell size of 8 by 20 pixels. Complements bit depth features.
 font-8x20 = []
+
+# Enables bitmap fonts with a cell size of 8 by 24 pixels. Complements bit depth features.
 font-8x24 = []
+
+# Enables bitmap fonts with a cell size of 8 by 24 pixels, bold. Complements bit depth features.
 font-8x24-bold = []
+
+# Enables bitmap fonts with a cell size of 10 by 30 pixels. Complements bit depth features.
 font-10x30 = []
+
+# Enables bitmap fonts with a cell size of 12 by 30 pixels. Complements bit depth features.
 font-12x30 = []
+
+# Enables bitmap fonts with a cell size of 12 by 36 pixels. Complements bit depth features.
 font-12x36 = []
+
+# Enables bitmap fonts with a cell size of 12 by 36 pixels, bold. Complements bit depth features.
 font-12x36-bold = []
+
+# Enables bitmap fonts with a cell size of 14 by 42 pixels. Complements bit depth features.
 font-14x42 = []
+
+# Enables bitmap fonts with a cell size of 16 by 40 pixels. Complements bit depth features.
 font-16x40 = []
+
+# Enables bitmap fonts with a cell size of 16 by 48 pixels. Complements bit depth features.
 font-16x48 = []
 
+# Enables bitmap fonts with a bit depth of 1 bit per pixel. Complements font size features.
 font-1-bit = []
+
+# Enables bitmap fonts with a bit depth of 2 bits per pixel. Complements font size features.
 font-2-bits = []
+
+# Enables bitmap fonts with a bit depth of 4 bits per pixel. Complements font size features.
 font-4-bits = []
+
+# Enables bitmap fonts with a bit depth of 8 bits per pixel. Complements font size features.
 font-8-bits = []
 
 # Adds 537 Unicode code points, including ASCII characters, to each constant enabled.

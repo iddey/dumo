@@ -42,6 +42,12 @@ pub use backend::*;
 ///
 /// * `bit_depth` - Bit depth of glyph images. Limited to `1`, `2`, `4`, `8`.
 /// * `sources` - Zero or more sources of textual data. Ranges of characters and arrays of strings.
+///
+/// # Examples
+///
+/// ```
+/// let bitmap_font = dumo::font_6x16!(4, '\x20'..'\x7F', ["‹›", "«»"]);
+/// ```
 #[macro_export]
 macro_rules! font_6x16 {
     ($($args:tt)*) => {
@@ -55,6 +61,12 @@ macro_rules! font_6x16 {
 ///
 /// * `bit_depth` - Bit depth of glyph images. Limited to `1`, `2`, `4`, `8`.
 /// * `sources` - Zero or more sources of textual data. Ranges of characters and arrays of strings.
+///
+/// # Examples
+///
+/// ```
+/// let bitmap_font = dumo::font_6x18!(4, '\x20'..'\x7F', ["‹›", "«»"]);
+/// ```
 #[macro_export]
 macro_rules! font_6x18 {
     ($($args:tt)*) => {
@@ -68,6 +80,12 @@ macro_rules! font_6x18 {
 ///
 /// * `bit_depth` - Bit depth of glyph images. Limited to `1`, `2`, `4`, `8`.
 /// * `sources` - Zero or more sources of textual data. Ranges of characters and arrays of strings.
+///
+/// # Examples
+///
+/// ```
+/// let bitmap_font = dumo::font_8x20!(4, '\x20'..'\x7F', ["‹›", "«»"]);
+/// ```
 #[macro_export]
 macro_rules! font_8x20 {
     ($($args:tt)*) => {
@@ -81,6 +99,12 @@ macro_rules! font_8x20 {
 ///
 /// * `bit_depth` - Bit depth of glyph images. Limited to `1`, `2`, `4`, `8`.
 /// * `sources` - Zero or more sources of textual data. Ranges of characters and arrays of strings.
+///
+/// # Examples
+///
+/// ```
+/// let bitmap_font = dumo::font_8x24!(4, '\x20'..'\x7F', ["‹›", "«»"]);
+/// ```
 #[macro_export]
 macro_rules! font_8x24 {
     ($($args:tt)*) => {
@@ -94,6 +118,12 @@ macro_rules! font_8x24 {
 ///
 /// * `bit_depth` - Bit depth of glyph images. Limited to `1`, `2`, `4`, `8`.
 /// * `sources` - Zero or more sources of textual data. Ranges of characters and arrays of strings.
+///
+/// # Examples
+///
+/// ```
+/// let bitmap_font = dumo::font_8x24_bold!(4, '\x20'..'\x7F', ["‹›", "«»"]);
+/// ```
 #[macro_export]
 macro_rules! font_8x24_bold {
     ($($args:tt)*) => {
@@ -108,6 +138,12 @@ macro_rules! font_8x24_bold {
 ///
 /// * `bit_depth` - Bit depth of glyph images. Limited to `1`, `2`, `4`, `8`.
 /// * `sources` - Zero or more sources of textual data. Ranges of characters and arrays of strings.
+///
+/// # Examples
+///
+/// ```
+/// let bitmap_font = dumo::font_10x30!(4, '\x20'..'\x7F', ["‹›", "«»"]);
+/// ```
 #[macro_export]
 macro_rules! font_10x30 {
     ($($args:tt)*) => {
@@ -121,6 +157,12 @@ macro_rules! font_10x30 {
 ///
 /// * `bit_depth` - Bit depth of glyph images. Limited to `1`, `2`, `4`, `8`.
 /// * `sources` - Zero or more sources of textual data. Ranges of characters and arrays of strings.
+///
+/// # Examples
+///
+/// ```
+/// let bitmap_font = dumo::font_12x30!(4, '\x20'..'\x7F', ["‹›", "«»"]);
+/// ```
 #[macro_export]
 macro_rules! font_12x30 {
     ($($args:tt)*) => {
@@ -134,6 +176,12 @@ macro_rules! font_12x30 {
 ///
 /// * `bit_depth` - Bit depth of glyph images. Limited to `1`, `2`, `4`, `8`.
 /// * `sources` - Zero or more sources of textual data. Ranges of characters and arrays of strings.
+///
+/// # Examples
+///
+/// ```
+/// let bitmap_font = dumo::font_12x36!(4, '\x20'..'\x7F', ["‹›", "«»"]);
+/// ```
 #[macro_export]
 macro_rules! font_12x36 {
     ($($args:tt)*) => {
@@ -147,6 +195,12 @@ macro_rules! font_12x36 {
 ///
 /// * `bit_depth` - Bit depth of glyph images. Limited to `1`, `2`, `4`, `8`.
 /// * `sources` - Zero or more sources of textual data. Ranges of characters and arrays of strings.
+///
+/// # Examples
+///
+/// ```
+/// let bitmap_font = dumo::font_12x36_bold!(4, '\x20'..'\x7F', ["‹›", "«»"]);
+/// ```
 #[macro_export]
 macro_rules! font_12x36_bold {
     ($($args:tt)*) => {
@@ -160,6 +214,12 @@ macro_rules! font_12x36_bold {
 ///
 /// * `bit_depth` - Bit depth of glyph images. Limited to `1`, `2`, `4`, `8`.
 /// * `sources` - Zero or more sources of textual data. Ranges of characters and arrays of strings.
+///
+/// # Examples
+///
+/// ```
+/// let bitmap_font = dumo::font_14x42!(4, '\x20'..'\x7F', ["‹›", "«»"]);
+/// ```
 #[macro_export]
 macro_rules! font_14x42 {
     ($($args:tt)*) => {
@@ -173,6 +233,12 @@ macro_rules! font_14x42 {
 ///
 /// * `bit_depth` - Bit depth of glyph images. Limited to `1`, `2`, `4`, `8`.
 /// * `sources` - Zero or more sources of textual data. Ranges of characters and arrays of strings.
+///
+/// # Examples
+///
+/// ```
+/// let bitmap_font = dumo::font_16x40!(4, '\x20'..'\x7F', ["‹›", "«»"]);
+/// ```
 #[macro_export]
 macro_rules! font_16x40 {
     ($($args:tt)*) => {
@@ -186,6 +252,12 @@ macro_rules! font_16x40 {
 ///
 /// * `bit_depth` - Bit depth of glyph images. Limited to `1`, `2`, `4`, `8`.
 /// * `sources` - Zero or more sources of textual data. Ranges of characters and arrays of strings.
+///
+/// # Examples
+///
+/// ```
+/// let bitmap_font = dumo::font_16x48!(4, '\x20'..'\x7F', ["‹›", "«»"]);
+/// ```
 #[macro_export]
 macro_rules! font_16x48 {
     ($($args:tt)*) => {
@@ -203,6 +275,12 @@ macro_rules! font_16x48 {
 /// * `hint` - Set to `true` to enable font hinting and adjust text shapes to a pixel grid.
 /// * `bit_depth` - Bit depth of glyph images. Limited to `1`, `2`, `4`, `8`.
 /// * `sources` - Zero or more sources of textual data. Ranges of characters and arrays of strings.
+///
+/// # Examples
+///
+/// ```
+/// let bitmap_font = dumo::mpluscode!(125, 500, 40.133333, true, 4, '\x20'..'\x7F', ["‹›", "«»"]);
+/// ```
 #[macro_export]
 macro_rules! mpluscode {
     ($width:tt, $weight:tt, $height:tt, $hint:tt, $($rest:tt)*) => {

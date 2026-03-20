@@ -35,19 +35,136 @@ where
 {
     /// Returns `true` if calls to the [`Backend::draw`] method also advance the blinking animation
     /// every time.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[cfg(not(all(feature = "alloc", feature = "font-8x24", feature = "font-4-bits")))]
+    /// # {
+    /// #     compile_error!("doc-test is missing required features");
+    /// # }
+    /// #
+    /// use dumo::blink::{Blink, ControlBlinking};
+    /// use dumo::cursor::{Colors, Cursor, Extent};
+    /// use dumo::fonts::*;
+    /// use dumo::DumoBackend;
+    /// # use embedded_graphics::mock_display::MockDisplay;
+    /// # use embedded_graphics::pixelcolor::Rgb565;
+    ///
+    /// # let mut display: MockDisplay<Rgb565> = MockDisplay::new();
+    /// let backend = DumoBackend::new(&mut display, &FONT_8X24_4_BITS)
+    ///     .with_blink(Blink::with_period(16), Blink::with_period(8))
+    ///     .with_cursor(
+    ///         Cursor::default()
+    ///             .blink(Blink::with_period(10))
+    ///             .colors(Colors::InvertedReset)
+    ///             .extent(Extent::Underline { height: 2 }),
+    ///     );
+    ///
+    /// let is_blinking = backend.blinking();
+    /// ```
     fn blinking(&self) -> bool;
 
     /// Starts driving the blinking animation, stepping by one frame at the end of each call to the
     /// [`Backend::draw`] method. This is the default behavior.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[cfg(not(all(feature = "alloc", feature = "font-8x24", feature = "font-4-bits")))]
+    /// # {
+    /// #     compile_error!("doc-test is missing required features");
+    /// # }
+    /// #
+    /// use dumo::blink::{Blink, ControlBlinking};
+    /// use dumo::cursor::{Colors, Cursor, Extent};
+    /// use dumo::fonts::*;
+    /// use dumo::DumoBackend;
+    /// # use embedded_graphics::mock_display::MockDisplay;
+    /// # use embedded_graphics::pixelcolor::Rgb565;
+    ///
+    /// # let mut display: MockDisplay<Rgb565> = MockDisplay::new();
+    /// let mut backend = DumoBackend::new(&mut display, &FONT_8X24_4_BITS)
+    ///     .with_blink(Blink::with_period(16), Blink::with_period(8))
+    ///     .with_cursor(
+    ///         Cursor::default()
+    ///             .blink(Blink::with_period(10))
+    ///             .colors(Colors::InvertedReset)
+    ///             .extent(Extent::Underline { height: 2 }),
+    ///     );
+    ///
+    /// backend.stop_blinking();
+    /// backend.start_blinking();
+    /// ```
     fn start_blinking(&mut self);
 
     /// Stops the blinking animation being driven by calls to the [`Backend::draw`] method, meaning
     /// that [`advance_blink`] needs to be called every frame.
     ///
     /// [`advance_blink`]: ControlBlinking::advance_blink
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[cfg(not(all(feature = "alloc", feature = "font-8x24", feature = "font-4-bits")))]
+    /// # {
+    /// #     compile_error!("doc-test is missing required features");
+    /// # }
+    /// #
+    /// use dumo::blink::{Blink, ControlBlinking};
+    /// use dumo::cursor::{Colors, Cursor, Extent};
+    /// use dumo::fonts::*;
+    /// use dumo::DumoBackend;
+    /// # use embedded_graphics::mock_display::MockDisplay;
+    /// # use embedded_graphics::pixelcolor::Rgb565;
+    ///
+    /// # let mut display: MockDisplay<Rgb565> = MockDisplay::new();
+    /// let mut backend = DumoBackend::new(&mut display, &FONT_8X24_4_BITS)
+    ///     .with_blink(Blink::with_period(16), Blink::with_period(8))
+    ///     .with_cursor(
+    ///         Cursor::default()
+    ///             .blink(Blink::with_period(10))
+    ///             .colors(Colors::InvertedReset)
+    ///             .extent(Extent::Underline { height: 2 }),
+    ///     );
+    ///
+    /// backend.stop_blinking();
+    /// ```
     fn stop_blinking(&mut self);
 
     /// Advances the blink animation cycles for all of the backend wrappers, stepping by one frame.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[cfg(not(all(feature = "alloc", feature = "font-8x24", feature = "font-4-bits")))]
+    /// # {
+    /// #     compile_error!("doc-test is missing required features");
+    /// # }
+    /// #
+    /// use dumo::blink::{Blink, ControlBlinking};
+    /// use dumo::cursor::{Colors, Cursor, Extent};
+    /// use dumo::fonts::*;
+    /// use dumo::DumoBackend;
+    /// # use embedded_graphics::mock_display::MockDisplay;
+    /// # use embedded_graphics::pixelcolor::Rgb565;
+    ///
+    /// # let mut display: MockDisplay<Rgb565> = MockDisplay::new();
+    /// let mut backend = DumoBackend::new(&mut display, &FONT_8X24_4_BITS)
+    ///     .with_blink(Blink::with_period(16), Blink::with_period(8))
+    ///     .with_cursor(
+    ///         Cursor::default()
+    ///             .blink(Blink::with_period(10))
+    ///             .colors(Colors::InvertedReset)
+    ///             .extent(Extent::Underline { height: 2 }),
+    ///     );
+    ///
+    /// backend.stop_blinking();
+    ///
+    /// for _ in 0..100 {
+    ///     backend.advance_blink();
+    /// }
+    /// ```
     fn advance_blink(&mut self) -> Result<(), Self::Error> {
         self.advance_blink_by(1)
     }
@@ -64,6 +181,36 @@ where
     /// Advances the blink animation cycle for the cursor if its _blinked_ state does not match the
     /// specified state, stepping forward until it does, or returning an error if there is no match
     /// in any of the frames.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[cfg(not(all(feature = "alloc", feature = "font-8x24", feature = "font-4-bits")))]
+    /// # {
+    /// #     compile_error!("doc-test is missing required features");
+    /// # }
+    /// #
+    /// use dumo::blink::{Blink, Blinked, ControlCursorBlinking};
+    /// use dumo::cursor::{Colors, Cursor, Extent};
+    /// use dumo::fonts::*;
+    /// use dumo::DumoBackend;
+    /// # use embedded_graphics::mock_display::MockDisplay;
+    /// # use embedded_graphics::pixelcolor::Rgb565;
+    ///
+    /// # let mut display: MockDisplay<Rgb565> = MockDisplay::new();
+    /// let mut backend = DumoBackend::new(&mut display, &FONT_8X24_4_BITS)
+    ///     .with_blink(Blink::with_period(16), Blink::with_period(8))
+    ///     .with_cursor(
+    ///         Cursor::default()
+    ///             .blink(Blink::with_period(10))
+    ///             .colors(Colors::InvertedReset)
+    ///             .extent(Extent::Underline { height: 2 }),
+    ///     );
+    ///
+    /// for _ in 0..100 {
+    ///     backend.advance_cursor_blink_to(Blinked(true));
+    /// }
+    /// ```
     fn advance_cursor_blink_to(&mut self, blinked: Blinked) -> Result<(), Self::Error>;
 }
 
@@ -71,6 +218,19 @@ impl Blink {
     /// Creates a new blink animation cycle with the specified period, where text is first visible,
     /// then hidden for a duration that is half the period, possibly one frame less than the first,
     /// where `period` is a number that measures frame count.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[cfg(not(feature = "alloc"))]
+    /// # {
+    /// #     compile_error!("doc-test is missing required features");
+    /// # }
+    /// #
+    /// use dumo::blink::Blink;
+    ///
+    /// let blink = Blink::with_period(10); // Repeat(5, 5)
+    /// ```
     pub const fn with_period(period: usize) -> Self {
         let blink = period / 2;
         let delay = period - blink;
@@ -80,6 +240,22 @@ impl Blink {
 
     /// Returns whether text has _blinked_ in a given frame, specified with a zero-based index from
     /// the beginning of the animation cycle, wrapping if greater than or equal to the period.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[cfg(not(feature = "alloc"))]
+    /// # {
+    /// #     compile_error!("doc-test is missing required features");
+    /// # }
+    /// #
+    /// use dumo::blink::{Blink, Blinked};
+    ///
+    /// let blink = Blink::with_period(10); // Repeat(5, 5)
+    ///
+    /// assert_eq!(blink.get(0), Blinked(false)); // Text is drawn as normal
+    /// assert_eq!(blink.get(5), Blinked(true)); // Text is not drawn or is drawn over
+    /// ```
     pub const fn get(&self, index: usize) -> Blinked {
         match *self {
             Self::Repeat(delay, blink) => {

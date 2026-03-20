@@ -15,6 +15,15 @@ pub struct PaletteBuilder<T: PixelColor, const N: usize>([T; N]);
 
 impl<T: PixelColor> PaletteBuilder<T, 0> {
     /// Creates a new, empty builder with an empty array of colors having type `T`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use dumo::color::PaletteBuilder;
+    /// # use embedded_graphics::pixelcolor::Rgb565;
+    ///
+    /// let builder: PaletteBuilder<Rgb565, _> = PaletteBuilder::new();
+    /// ```
     pub const fn new() -> Self {
         Self([])
     }
@@ -24,6 +33,19 @@ impl<T: PixelColor> PaletteBuilder<T, 256> {
     /// Consumes the builder, returning the array of colors having type `T`.
     ///
     /// This method is only available after all 256 colors have been added.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use dumo::color::PaletteBuilder;
+    /// # use embedded_graphics::pixelcolor::Rgb565;
+    ///
+    /// let palette = PaletteBuilder::new()
+    ///     .head(&[Rgb565::default(); 16])
+    ///     .body(&[Rgb565::default(); 216])
+    ///     .tail(&[Rgb565::default(); 24])
+    ///     .build();
+    /// ```
     pub const fn build(self) -> [T; 256] {
         self.0
     }
@@ -39,6 +61,21 @@ macro_rules! impl_add {
             impl<T: PixelColor> PaletteBuilder<T, $array_length> {
                 /// Adds a number of colors, inserting them at the expected position in a new array
                 /// where the colors that have previously been added are also moved.
+                ///
+                /// # Examples
+                ///
+                /// ```
+                /// use dumo::color::PaletteBuilder;
+                /// # use embedded_graphics::pixelcolor::Rgb565;
+                ///
+                #[doc = concat!(
+                    "let palette = PaletteBuilder::new().",
+                    stringify!($fn_ident),
+                    "(&[Rgb565::default(); ",
+                    stringify!($n - $array_length),
+                    "]);",
+                )]
+                /// ```
                 #[must_use = "method copies new and any existing colors to a new array"]
                 pub const fn $fn_ident(
                     self,

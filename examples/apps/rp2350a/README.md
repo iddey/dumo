@@ -43,11 +43,11 @@ Binaries are uploaded via USB in bootloader mode. Usage: `cargo run --release --
 
 ## Minimum supported Rust version
 
-The minimum supported Rust version for `mplusfonts-examples-rp2350a` is `1.89`.
+The minimum supported Rust version for `dumo-examples-rp2350a` is `1.89`.
 
 ## License
 
-The source code of `mplusfonts-examples-rp2350a` is dual-licensed under:
+The source code of `dumo-examples-rp2350a` is dual-licensed under:
 
 * Apache License, Version 2.0 ([LICENSE-APACHE] or <http://www.apache.org/licenses/LICENSE-2.0>)
 * MIT License ([LICENSE-MIT] or <http://opensource.org/licenses/MIT>)

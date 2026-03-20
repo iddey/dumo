@@ -80,12 +80,55 @@ where
 pub trait DrawTargetBackend<D: DrawTarget>: Backend {
     /// Invokes the specified function item, which gets to access the draw target in the scope of a
     /// function call.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[cfg(not(all(feature = "font-8x24", feature = "font-4-bits")))]
+    /// # {
+    /// #     compile_error!("doc-test is missing required features");
+    /// # }
+    /// #
+    /// use dumo::fonts::*;
+    /// use dumo::{DrawTargetBackend, DumoBackend};
+    /// # use embedded_graphics::mock_display::MockDisplay;
+    /// # use embedded_graphics::pixelcolor::Rgb565;
+    ///
+    /// # let mut display: MockDisplay<Rgb565> = MockDisplay::new();
+    /// let mut backend = DumoBackend::new(&mut display, &FONT_8X24_4_BITS);
+    ///
+    /// backend.call(|display| {
+    ///     // ...
+    ///
+    ///     Ok(())
+    /// });
+    /// ```
     fn call(&mut self, f: impl FnMut(&mut D) -> Result<(), D::Error>) -> Result<(), D::Error>;
 
     /// Draws the specified content as if [`HIDDEN`](ratatui_core::style::Modifier::HIDDEN) was set
     /// on all of the items, which is equivalent to using the background colors — or the foreground
     /// colors if [`REVERSED`](ratatui_core::style::Modifier::REVERSED) is set — to clear the cells
     /// that each of the characters or character clusters spans.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[cfg(not(all(feature = "font-8x24", feature = "font-4-bits")))]
+    /// # {
+    /// #     compile_error!("doc-test is missing required features");
+    /// # }
+    /// #
+    /// use dumo::fonts::*;
+    /// use dumo::{DrawTargetBackend, DumoBackend};
+    /// # use embedded_graphics::mock_display::MockDisplay;
+    /// # use embedded_graphics::pixelcolor::Rgb565;
+    /// use ratatui::buffer::Cell;
+    ///
+    /// # let mut display: MockDisplay<Rgb565> = MockDisplay::new();
+    /// let mut backend = DumoBackend::new(&mut display, &FONT_8X24_4_BITS);
+    ///
+    /// backend.draw_hidden(core::iter::once((0, 0, &Cell::new("A"))));
+    /// ```
     fn draw_hidden<'z, I>(&mut self, content: I) -> Result<(), Self::Error>
     where
         I: Iterator<Item = (u16, u16, &'z Cell)>;
@@ -99,6 +142,32 @@ pub trait DrawTargetBackend<D: DrawTarget>: Backend {
     /// drawn, as is whether text should be bold or hidden, including having _blinked_.
     ///
     /// [`Symbol::Custom`] only respects the content's modifier to have the set of colors reversed.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[cfg(not(all(feature = "font-8x24", feature = "font-4-bits")))]
+    /// # {
+    /// #     compile_error!("doc-test is missing required features");
+    /// # }
+    /// #
+    /// use dumo::cursor::{Colors, Extent, Symbol};
+    /// use dumo::fonts::*;
+    /// use dumo::{DrawTargetBackend, DumoBackend};
+    /// # use embedded_graphics::mock_display::MockDisplay;
+    /// # use embedded_graphics::pixelcolor::Rgb565;
+    /// use ratatui::buffer::Cell;
+    ///
+    /// # let mut display: MockDisplay<Rgb565> = MockDisplay::new();
+    /// let mut backend = DumoBackend::new(&mut display, &FONT_8X24_4_BITS);
+    ///
+    /// backend.draw_cursor(
+    ///     core::iter::once((0, 0, &Cell::new("A"))),
+    ///     Colors::ReversedReset,
+    ///     Extent::FullBlock,
+    ///     Symbol::UnderCursor,
+    /// );
+    /// ```
     fn draw_cursor<'z, I>(
         &mut self,
         content: I,
@@ -112,10 +181,61 @@ pub trait DrawTargetBackend<D: DrawTarget>: Backend {
     /// Advances the blinking animation associated with the backend or backend wrapper if there are
     /// such features, calling [`advance_blink_by`](DrawTargetBackend::advance_blink_by) afterwards
     /// so that inner layers can do the same. The `ticks` are added to their internal frame counts.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[cfg(not(all(feature = "alloc", feature = "font-8x24", feature = "font-4-bits")))]
+    /// # {
+    /// #     compile_error!("doc-test is missing required features");
+    /// # }
+    /// #
+    /// use dumo::blink::{Blink, ControlBlinking};
+    /// use dumo::fonts::*;
+    /// use dumo::{DrawTargetBackend, DumoBackend};
+    /// # use embedded_graphics::mock_display::MockDisplay;
+    /// # use embedded_graphics::pixelcolor::Rgb565;
+    ///
+    /// # let mut display: MockDisplay<Rgb565> = MockDisplay::new();
+    /// let mut backend = DumoBackend::new(&mut display, &FONT_8X24_4_BITS)
+    ///     .with_blink(Blink::with_period(16), Blink::with_period(8));
+    ///
+    /// backend.stop_blinking();
+    ///
+    /// for _ in 0..100 {
+    ///     backend.advance_blink_by(1);
+    /// }
+    /// ```
     fn advance_blink_by(&mut self, ticks: usize) -> Result<(), Self::Error>;
 
     /// Takes the unit from the backend or backend wrapper, indicating, when [`Some`], that an area
     /// of the draw target with the cursor has been redrawn without the cursor being drawn over it.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[cfg(not(all(feature = "alloc", feature = "font-8x24", feature = "font-4-bits")))]
+    /// # {
+    /// #     compile_error!("doc-test is missing required features");
+    /// # }
+    /// #
+    /// use dumo::blink::Blink;
+    /// use dumo::cursor::Cursor;
+    /// use dumo::error::Error;
+    /// use dumo::fonts::*;
+    /// use dumo::{DrawTargetBackend, DumoBackend};
+    /// # use embedded_graphics::mock_display::MockDisplay;
+    /// # use embedded_graphics::pixelcolor::Rgb565;
+    ///
+    /// # let mut display: MockDisplay<Rgb565> = MockDisplay::new();
+    /// let mut backend = DumoBackend::new(&mut display, &FONT_8X24_4_BITS)
+    ///     .with_blink(Blink::with_period(16), Blink::with_period(8))
+    ///     .with_cursor(Cursor::default());
+    ///
+    /// let cursor_is_dirty = backend.take_dirty_cursor()?.is_some();
+    ///
+    /// Ok::<(), Error<_>>(())
+    /// ```
     fn take_dirty_cursor(&mut self) -> Result<Option<()>, Self::Error>;
 }
 
@@ -130,6 +250,25 @@ where
     RawDataSlice<'a, C::Raw, BigEndian>: IntoIterator<Item = C::Raw>,
 {
     /// Returns the bitmap font to use in general.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[cfg(not(all(feature = "font-8x24", feature = "font-4-bits")))]
+    /// # {
+    /// #     compile_error!("doc-test is missing required features");
+    /// # }
+    /// #
+    /// use dumo::fonts::*;
+    /// use dumo::{ConfigureBackend, DumoBackend};
+    /// # use embedded_graphics::mock_display::MockDisplay;
+    /// # use embedded_graphics::pixelcolor::Rgb565;
+    ///
+    /// # let mut display: MockDisplay<Rgb565> = MockDisplay::new();
+    /// let backend = DumoBackend::new(&mut display, &FONT_8X24_4_BITS);
+    ///
+    /// let bitmap_font = backend.font();
+    /// ```
     fn font(&self) -> &'b BitmapFont<'a, C, 1>;
 
     /// Sets the bitmap font to use in general.
@@ -137,12 +276,55 @@ where
     /// This bitmap font is used to render text that either has no modifiers set, is set to italic,
     /// and also text that is set to bold, when the bitmap font for when text should be bold is not
     /// set to a value.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[cfg(not(all(feature = "font-8x24", feature = "font-12x36", feature = "font-4-bits")))]
+    /// # {
+    /// #     compile_error!("doc-test is missing required features");
+    /// # }
+    /// #
+    /// use dumo::fonts::*;
+    /// use dumo::{ConfigureBackend, DumoBackend};
+    /// # use embedded_graphics::mock_display::MockDisplay;
+    /// # use embedded_graphics::pixelcolor::Rgb565;
+    ///
+    /// # let mut display: MockDisplay<Rgb565> = MockDisplay::new();
+    /// let mut backend = DumoBackend::new(&mut display, &FONT_8X24_4_BITS);
+    ///
+    /// backend.set_font(&FONT_12X36_4_BITS);
+    /// ```
     fn set_font(&mut self, font: &'b BitmapFont<'a, C, 1>);
 
     /// Returns the optional bitmap font for when text should be bold.
     ///
     /// When not set to a value, the backend renders all texts, including text that should be bold,
     /// using the regular font.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[cfg(not(all(
+    /// #     feature = "font-8x24",
+    /// #     feature = "font-8x24-bold",
+    /// #     feature = "font-4-bits",
+    /// # )))]
+    /// # {
+    /// #     compile_error!("doc-test is missing required features");
+    /// # }
+    /// #
+    /// use dumo::fonts::*;
+    /// use dumo::{ConfigureBackend, DumoBackend};
+    /// # use embedded_graphics::mock_display::MockDisplay;
+    /// # use embedded_graphics::pixelcolor::Rgb565;
+    ///
+    /// # let mut display: MockDisplay<Rgb565> = MockDisplay::new();
+    /// let mut backend = DumoBackend::new(&mut display, &FONT_8X24_4_BITS);
+    /// backend.set_font_bold(Some(&FONT_8X24_BOLD_4_BITS));
+    ///
+    /// let bitmap_font_bold = backend.font_bold();
+    /// ```
     fn font_bold(&self) -> Option<&'b BitmapFont<'a, C, 1>>;
 
     /// Sets the optional bitmap font for when text should be bold.
@@ -153,11 +335,56 @@ where
     /// This bitmap font and the regular one should have the same cell size; otherwise, the backend
     /// will introduce clipping or padding with the background color in character cells, the reason
     /// being that the cell size is always calculated using the regular font.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[cfg(not(all(
+    /// #    feature = "font-8x24",
+    /// #    feature = "font-12x36",
+    /// #    feature = "font-12x36-bold",
+    /// #    feature = "font-4-bits"
+    /// # )))]
+    /// # {
+    /// #     compile_error!("doc-test is missing required features");
+    /// # }
+    /// #
+    /// use dumo::fonts::*;
+    /// use dumo::{ConfigureBackend, DumoBackend};
+    /// # use embedded_graphics::mock_display::MockDisplay;
+    /// # use embedded_graphics::pixelcolor::Rgb565;
+    ///
+    /// # let mut display: MockDisplay<Rgb565> = MockDisplay::new();
+    /// let mut backend = DumoBackend::new(&mut display, &FONT_8X24_4_BITS);
+    /// backend.set_font(&FONT_12X36_4_BITS);
+    ///
+    /// backend.set_font_bold(Some(&FONT_12X36_BOLD_4_BITS));
+    /// ```
     fn set_font_bold(&mut self, font_bold: Option<&'b BitmapFont<'a, C, 1>>);
 
     /// Returns the optional foreground color to use in case no specific color is set.
     ///
     /// When not set to a value, the backend uses the inverse of the default value for type `T`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[cfg(not(all(feature = "font-8x24", feature = "font-4-bits")))]
+    /// # {
+    /// #     compile_error!("doc-test is missing required features");
+    /// # }
+    /// #
+    /// use dumo::fonts::*;
+    /// use dumo::{ConfigureBackend, DumoBackend};
+    /// # use embedded_graphics::mock_display::MockDisplay;
+    /// # use embedded_graphics::pixelcolor::Rgb565;
+    ///
+    /// # let mut display: MockDisplay<Rgb565> = MockDisplay::new();
+    /// let mut backend = DumoBackend::new(&mut display, &FONT_8X24_4_BITS);
+    /// backend.set_fg_reset(Some(Rgb565::new(30, 60, 30)));
+    ///
+    /// let text_color = backend.fg_reset();
+    /// ```
     fn fg_reset(&self) -> Option<T>;
 
     /// Sets the optional foreground color to use in case no specific color is set.
@@ -165,11 +392,50 @@ where
     /// When not set to a value, the backend uses the inverse of the default value for type `T`.
     ///
     /// This color is used as the default foreground color, when the text color is reset.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[cfg(not(all(feature = "font-8x24", feature = "font-4-bits")))]
+    /// # {
+    /// #     compile_error!("doc-test is missing required features");
+    /// # }
+    /// #
+    /// use dumo::fonts::*;
+    /// use dumo::{ConfigureBackend, DumoBackend};
+    /// # use embedded_graphics::mock_display::MockDisplay;
+    /// # use embedded_graphics::pixelcolor::Rgb565;
+    ///
+    /// # let mut display: MockDisplay<Rgb565> = MockDisplay::new();
+    /// let mut backend = DumoBackend::new(&mut display, &FONT_8X24_4_BITS);
+    ///
+    /// backend.set_fg_reset(Some(Rgb565::new(30, 60, 30)));
+    /// ```
     fn set_fg_reset(&mut self, fg_reset: Option<T>);
 
     /// Returns the optional background color to use in case no specific color is set.
     ///
     /// When not set to a value, the backend uses the default value for type `T`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[cfg(not(all(feature = "font-8x24", feature = "font-4-bits")))]
+    /// # {
+    /// #     compile_error!("doc-test is missing required features");
+    /// # }
+    /// #
+    /// use dumo::fonts::*;
+    /// use dumo::{ConfigureBackend, DumoBackend};
+    /// # use embedded_graphics::mock_display::MockDisplay;
+    /// # use embedded_graphics::pixelcolor::Rgb565;
+    ///
+    /// # let mut display: MockDisplay<Rgb565> = MockDisplay::new();
+    /// let mut backend = DumoBackend::new(&mut display, &FONT_8X24_4_BITS);
+    /// backend.set_bg_reset(Some(Rgb565::new(5, 10, 5)));
+    ///
+    /// let background_color = backend.bg_reset();
+    /// ```
     fn bg_reset(&self) -> Option<T>;
 
     /// Sets the optional background color to use in case no specific color is set.
@@ -177,18 +443,119 @@ where
     /// When not set to a value, the backend uses the default value for type `T`.
     ///
     /// This color is used as the default background color, when the text background color is reset.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[cfg(not(all(feature = "font-8x24", feature = "font-4-bits")))]
+    /// # {
+    /// #     compile_error!("doc-test is missing required features");
+    /// # }
+    /// #
+    /// use dumo::fonts::*;
+    /// use dumo::{ConfigureBackend, DumoBackend};
+    /// # use embedded_graphics::mock_display::MockDisplay;
+    /// # use embedded_graphics::pixelcolor::Rgb565;
+    ///
+    /// # let mut display: MockDisplay<Rgb565> = MockDisplay::new();
+    /// let mut backend = DumoBackend::new(&mut display, &FONT_8X24_4_BITS);
+    ///
+    /// backend.set_bg_reset(Some(Rgb565::new(5, 10, 5)));
+    /// ```
     fn set_bg_reset(&mut self, bg_reset: Option<T>);
 
     /// Returns the color palette for looking up ANSI colors by index, including the 16 named ones.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[cfg(not(all(feature = "font-8x24", feature = "font-4-bits")))]
+    /// # {
+    /// #     compile_error!("doc-test is missing required features");
+    /// # }
+    /// #
+    /// use dumo::color::Palettes;
+    /// use dumo::fonts::*;
+    /// use dumo::{ConfigureBackend, DumoBackend};
+    /// # use embedded_graphics::mock_display::MockDisplay;
+    /// # use embedded_graphics::pixelcolor::Rgb565;
+    ///
+    /// # let mut display: MockDisplay<Rgb565> = MockDisplay::new();
+    /// let mut backend = DumoBackend::new(&mut display, &FONT_8X24_4_BITS);
+    /// backend.set_palette(Rgb565::WEB_256);
+    ///
+    /// let web_color_palette = backend.palette();
+    /// ```
     fn palette(&self) -> Palette<'c, T>;
 
     /// Sets the color palette for looking up ANSI colors by index, including the 16 named ones.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[cfg(not(all(feature = "font-8x24", feature = "font-4-bits")))]
+    /// # {
+    /// #     compile_error!("doc-test is missing required features");
+    /// # }
+    /// #
+    /// use dumo::color::Palettes;
+    /// use dumo::fonts::*;
+    /// use dumo::{ConfigureBackend, DumoBackend};
+    /// # use embedded_graphics::mock_display::MockDisplay;
+    /// # use embedded_graphics::pixelcolor::Rgb565;
+    ///
+    /// # let mut display: MockDisplay<Rgb565> = MockDisplay::new();
+    /// let mut backend = DumoBackend::new(&mut display, &FONT_8X24_4_BITS);
+    ///
+    /// backend.set_palette(Rgb565::WEB_256);
+    /// ```
     fn set_palette(&mut self, palette: Palette<'c, T>);
 
     /// Returns the _x_-axis anchor point for which sides of cells to align in case of disagreement.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[cfg(not(all(feature = "font-8x24", feature = "font-4-bits")))]
+    /// # {
+    /// #     compile_error!("doc-test is missing required features");
+    /// # }
+    /// #
+    /// use dumo::fonts::*;
+    /// use dumo::{ConfigureBackend, DumoBackend};
+    /// # use embedded_graphics::geometry::AnchorX;
+    /// # use embedded_graphics::mock_display::MockDisplay;
+    /// # use embedded_graphics::pixelcolor::Rgb565;
+    ///
+    /// # let mut display: MockDisplay<Rgb565> = MockDisplay::new();
+    /// let mut backend = DumoBackend::new(&mut display, &FONT_8X24_4_BITS);
+    /// backend.set_anchor_x(AnchorX::Center);
+    ///
+    /// let center_anchor_x = backend.anchor_x();
+    /// ```
     fn anchor_x(&self) -> AnchorX;
 
     /// Sets the _x_-axis anchor point for which sides of cells to align in case of disagreement.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[cfg(not(all(feature = "font-8x24", feature = "font-4-bits")))]
+    /// # {
+    /// #     compile_error!("doc-test is missing required features");
+    /// # }
+    /// #
+    /// use dumo::fonts::*;
+    /// use dumo::{ConfigureBackend, DumoBackend};
+    /// # use embedded_graphics::geometry::AnchorX;
+    /// # use embedded_graphics::mock_display::MockDisplay;
+    /// # use embedded_graphics::pixelcolor::Rgb565;
+    ///
+    /// # let mut display: MockDisplay<Rgb565> = MockDisplay::new();
+    /// let mut backend = DumoBackend::new(&mut display, &FONT_8X24_4_BITS);
+    ///
+    /// backend.set_anchor_x(AnchorX::Center);
+    /// ```
     fn set_anchor_x(&mut self, anchor_x: AnchorX);
 }
 
@@ -203,6 +570,23 @@ where
 {
     /// Creates a new backend with exclusive access to the specified draw target, configuring it to
     /// use the specified bitmap font for text rendering.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[cfg(not(all(feature = "font-8x24", feature = "font-4-bits")))]
+    /// # {
+    /// #     compile_error!("doc-test is missing required features");
+    /// # }
+    /// #
+    /// use dumo::DumoBackend;
+    /// use dumo::fonts::*;
+    /// # use embedded_graphics::mock_display::MockDisplay;
+    /// # use embedded_graphics::pixelcolor::Rgb565;
+    ///
+    /// # let mut display: MockDisplay<Rgb565> = MockDisplay::new();
+    /// let backend = DumoBackend::new(&mut display, &FONT_8X24_4_BITS);
+    /// ```
     pub const fn new(target: &'d mut D, font: &'b BitmapFont<'a, C, 1>) -> Self
     where
         D::Color: Palettes<'c>,

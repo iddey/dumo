@@ -40,6 +40,30 @@ where
     /// Creates a new wrapper around the specified backend, configuring the specified function item
     /// as the one to invoke when the flush method of the backend is called. All other methods call
     /// the backend as if there was no wrapper around it.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[cfg(not(all(feature = "font-8x24", feature = "font-4-bits")))]
+    /// # {
+    /// #     compile_error!("doc-test is missing required features");
+    /// # }
+    /// #
+    /// use dumo::fonts::*;
+    /// use dumo::{DumoBackend, FlushWrapper};
+    /// # use embedded_graphics::mock_display::MockDisplay;
+    /// # use embedded_graphics::pixelcolor::Rgb565;
+    ///
+    /// # let mut display: MockDisplay<Rgb565> = MockDisplay::new();
+    /// let wrapper = FlushWrapper::new(
+    ///     DumoBackend::new(&mut display, &FONT_8X24_4_BITS),
+    ///     |display| {
+    ///         // ...
+    ///
+    ///         Ok(())
+    ///     },
+    /// );
+    /// ```
     pub const fn new(backend: B, flush_fn: F) -> Self {
         Self {
             backend,

@@ -51,15 +51,99 @@ where
 /// configurable to have their values read or have new values assigned.
 pub trait ConfigureBlinkWrapper {
     /// Returns the blink animation cycle for slow blinking.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[cfg(not(all(feature = "alloc", feature = "font-8x24", feature = "font-4-bits")))]
+    /// # {
+    /// #     compile_error!("doc-test is missing required features");
+    /// # }
+    /// #
+    /// use dumo::blink::Blink;
+    /// use dumo::fonts::*;
+    /// use dumo::{ConfigureBlinkWrapper, DumoBackend};
+    /// # use embedded_graphics::mock_display::MockDisplay;
+    /// # use embedded_graphics::pixelcolor::Rgb565;
+    ///
+    /// # let mut display: MockDisplay<Rgb565> = MockDisplay::new();
+    /// let backend = DumoBackend::new(&mut display, &FONT_8X24_4_BITS)
+    ///     .with_blink(Blink::with_period(16), Blink::with_period(8));
+    ///
+    /// let slow_blink = backend.slow_blink();
+    /// ```
     fn slow_blink(&self) -> Blink;
 
     /// Sets the blink animation cycle for slow blinking.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[cfg(not(all(feature = "alloc", feature = "font-8x24", feature = "font-4-bits")))]
+    /// # {
+    /// #     compile_error!("doc-test is missing required features");
+    /// # }
+    /// #
+    /// use dumo::blink::Blink;
+    /// use dumo::fonts::*;
+    /// use dumo::{ConfigureBlinkWrapper, DumoBackend};
+    /// # use embedded_graphics::mock_display::MockDisplay;
+    /// # use embedded_graphics::pixelcolor::Rgb565;
+    ///
+    /// # let mut display: MockDisplay<Rgb565> = MockDisplay::new();
+    /// let mut backend = DumoBackend::new(&mut display, &FONT_8X24_4_BITS)
+    ///     .with_blink(Blink::with_period(16), Blink::with_period(8));
+    ///
+    /// backend.set_slow_blink(Blink::with_period(20));
+    /// ```
     fn set_slow_blink(&mut self, slow_blink: Blink);
 
     /// Returns the blink animation cycle for rapid blinking.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[cfg(not(all(feature = "alloc", feature = "font-8x24", feature = "font-4-bits")))]
+    /// # {
+    /// #     compile_error!("doc-test is missing required features");
+    /// # }
+    /// #
+    /// use dumo::blink::Blink;
+    /// use dumo::fonts::*;
+    /// use dumo::{ConfigureBlinkWrapper, DumoBackend};
+    /// # use embedded_graphics::mock_display::MockDisplay;
+    /// # use embedded_graphics::pixelcolor::Rgb565;
+    ///
+    /// # let mut display: MockDisplay<Rgb565> = MockDisplay::new();
+    /// let backend = DumoBackend::new(&mut display, &FONT_8X24_4_BITS)
+    ///     .with_blink(Blink::with_period(16), Blink::with_period(8));
+    ///
+    /// let rapid_blink = backend.rapid_blink();
+    /// ```
     fn rapid_blink(&self) -> Blink;
 
     /// Sets the blink animation cycle for rapid blinking.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[cfg(not(all(feature = "alloc", feature = "font-8x24", feature = "font-4-bits")))]
+    /// # {
+    /// #     compile_error!("doc-test is missing required features");
+    /// # }
+    /// #
+    /// use dumo::blink::Blink;
+    /// use dumo::fonts::*;
+    /// use dumo::{ConfigureBlinkWrapper, DumoBackend};
+    /// # use embedded_graphics::mock_display::MockDisplay;
+    /// # use embedded_graphics::pixelcolor::Rgb565;
+    ///
+    /// # let mut display: MockDisplay<Rgb565> = MockDisplay::new();
+    /// let mut backend = DumoBackend::new(&mut display, &FONT_8X24_4_BITS)
+    ///     .with_blink(Blink::with_period(16), Blink::with_period(8));
+    ///
+    /// backend.set_rapid_blink(Blink::with_period(10));
+    /// ```
     fn set_rapid_blink(&mut self, rapid_blink: Blink);
 }
 
@@ -71,6 +155,28 @@ where
 {
     /// Creates a new wrapper around the specified backend, configuring the slow and rapid blinking
     /// animation cycles.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[cfg(not(all(feature = "alloc", feature = "font-8x24", feature = "font-4-bits")))]
+    /// # {
+    /// #     compile_error!("doc-test is missing required features");
+    /// # }
+    /// #
+    /// use dumo::blink::Blink;
+    /// use dumo::fonts::*;
+    /// use dumo::{BlinkWrapper, DumoBackend};
+    /// # use embedded_graphics::mock_display::MockDisplay;
+    /// # use embedded_graphics::pixelcolor::Rgb565;
+    ///
+    /// # let mut display: MockDisplay<Rgb565> = MockDisplay::new();
+    /// let wrapper = BlinkWrapper::new(
+    ///     DumoBackend::new(&mut display, &FONT_8X24_4_BITS),
+    ///     Blink::with_period(16),
+    ///     Blink::with_period(8),
+    /// );
+    /// ```
     pub const fn new(backend: B, slow_blink: Blink, rapid_blink: Blink) -> Self {
         Self {
             backend,

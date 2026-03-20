@@ -55,27 +55,235 @@ where
 /// configurable to have their values read or have new values assigned.
 pub trait ConfigureCursorWrapper<'a> {
     /// Returns the blink animation cycle for the cursor.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[cfg(not(all(feature = "alloc", feature = "font-8x24", feature = "font-4-bits")))]
+    /// # {
+    /// #     compile_error!("doc-test is missing required features");
+    /// # }
+    /// #
+    /// use dumo::blink::Blink;
+    /// use dumo::cursor::{Colors, Cursor, Extent};
+    /// use dumo::fonts::*;
+    /// use dumo::{ConfigureCursorWrapper, DumoBackend};
+    /// # use embedded_graphics::mock_display::MockDisplay;
+    /// # use embedded_graphics::pixelcolor::Rgb565;
+    ///
+    /// # let mut display: MockDisplay<Rgb565> = MockDisplay::new();
+    /// let backend = DumoBackend::new(&mut display, &FONT_8X24_4_BITS).with_cursor(
+    ///     Cursor::default()
+    ///         .blink(Blink::with_period(10))
+    ///         .colors(Colors::InvertedReset)
+    ///         .extent(Extent::Underline { height: 2 }),
+    /// );
+    ///
+    /// let cursor_blink = backend.get_cursor_blink();
+    /// ```
     fn get_cursor_blink(&self) -> Blink;
 
     /// Sets the blink animation cycle for the cursor.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[cfg(not(all(feature = "alloc", feature = "font-8x24", feature = "font-4-bits")))]
+    /// # {
+    /// #     compile_error!("doc-test is missing required features");
+    /// # }
+    /// #
+    /// use dumo::blink::Blink;
+    /// use dumo::cursor::{Colors, Cursor, Extent};
+    /// use dumo::fonts::*;
+    /// use dumo::{ConfigureCursorWrapper, DumoBackend};
+    /// # use embedded_graphics::mock_display::MockDisplay;
+    /// # use embedded_graphics::pixelcolor::Rgb565;
+    ///
+    /// # let mut display: MockDisplay<Rgb565> = MockDisplay::new();
+    /// let mut backend = DumoBackend::new(&mut display, &FONT_8X24_4_BITS).with_cursor(
+    ///     Cursor::default()
+    ///         .blink(Blink::with_period(10))
+    ///         .colors(Colors::InvertedReset)
+    ///         .extent(Extent::Underline { height: 2 }),
+    /// );
+    ///
+    /// backend.set_cursor_blink(Blink::with_period(12));
+    /// ```
     fn set_cursor_blink(&mut self, blink: Blink);
 
     /// Returns the method used by the cursor for choosing colors.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[cfg(not(all(feature = "alloc", feature = "font-8x24", feature = "font-4-bits")))]
+    /// # {
+    /// #     compile_error!("doc-test is missing required features");
+    /// # }
+    /// #
+    /// use dumo::blink::Blink;
+    /// use dumo::cursor::{Colors, Cursor, Extent};
+    /// use dumo::fonts::*;
+    /// use dumo::{ConfigureCursorWrapper, DumoBackend};
+    /// # use embedded_graphics::mock_display::MockDisplay;
+    /// # use embedded_graphics::pixelcolor::Rgb565;
+    ///
+    /// # let mut display: MockDisplay<Rgb565> = MockDisplay::new();
+    /// let backend = DumoBackend::new(&mut display, &FONT_8X24_4_BITS).with_cursor(
+    ///     Cursor::default()
+    ///         .blink(Blink::with_period(10))
+    ///         .colors(Colors::InvertedReset)
+    ///         .extent(Extent::Underline { height: 2 }),
+    /// );
+    ///
+    /// let cursor_colors = backend.get_cursor_colors();
+    /// ```
     fn get_cursor_colors(&self) -> Colors;
 
     /// Sets the method used by the cursor for choosing colors.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[cfg(not(all(feature = "alloc", feature = "font-8x24", feature = "font-4-bits")))]
+    /// # {
+    /// #     compile_error!("doc-test is missing required features");
+    /// # }
+    /// #
+    /// use dumo::blink::Blink;
+    /// use dumo::cursor::{Colors, Cursor, Extent};
+    /// use dumo::fonts::*;
+    /// use dumo::{ConfigureCursorWrapper, DumoBackend};
+    /// # use embedded_graphics::mock_display::MockDisplay;
+    /// # use embedded_graphics::pixelcolor::Rgb565;
+    ///
+    /// # let mut display: MockDisplay<Rgb565> = MockDisplay::new();
+    /// let mut backend = DumoBackend::new(&mut display, &FONT_8X24_4_BITS).with_cursor(
+    ///     Cursor::default()
+    ///         .blink(Blink::with_period(10))
+    ///         .colors(Colors::InvertedReset)
+    ///         .extent(Extent::Underline { height: 2 }),
+    /// );
+    ///
+    /// backend.set_cursor_colors(Colors::ReversedReset);
+    /// ```
     fn set_cursor_colors(&mut self, colors: Colors);
 
     /// Returns the shape that represents the cursor inside of the cell area.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[cfg(not(all(feature = "alloc", feature = "font-8x24", feature = "font-4-bits")))]
+    /// # {
+    /// #     compile_error!("doc-test is missing required features");
+    /// # }
+    /// #
+    /// use dumo::blink::Blink;
+    /// use dumo::cursor::{Colors, Cursor, Extent};
+    /// use dumo::fonts::*;
+    /// use dumo::{ConfigureCursorWrapper, DumoBackend};
+    /// # use embedded_graphics::mock_display::MockDisplay;
+    /// # use embedded_graphics::pixelcolor::Rgb565;
+    ///
+    /// # let mut display: MockDisplay<Rgb565> = MockDisplay::new();
+    /// let backend = DumoBackend::new(&mut display, &FONT_8X24_4_BITS).with_cursor(
+    ///     Cursor::default()
+    ///         .blink(Blink::with_period(10))
+    ///         .colors(Colors::InvertedReset)
+    ///         .extent(Extent::Underline { height: 2 }),
+    /// );
+    ///
+    /// let cursor_extent = backend.get_cursor_extent();
+    /// ```
     fn get_cursor_extent(&self) -> Extent;
 
     /// Sets the shape that represents the cursor inside of the cell area.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[cfg(not(all(feature = "alloc", feature = "font-8x24", feature = "font-4-bits")))]
+    /// # {
+    /// #     compile_error!("doc-test is missing required features");
+    /// # }
+    /// #
+    /// use dumo::blink::Blink;
+    /// use dumo::cursor::{Colors, Cursor, Extent};
+    /// use dumo::fonts::*;
+    /// use dumo::{ConfigureCursorWrapper, DumoBackend};
+    /// # use embedded_graphics::mock_display::MockDisplay;
+    /// # use embedded_graphics::pixelcolor::Rgb565;
+    ///
+    /// # let mut display: MockDisplay<Rgb565> = MockDisplay::new();
+    /// let mut backend = DumoBackend::new(&mut display, &FONT_8X24_4_BITS).with_cursor(
+    ///     Cursor::default()
+    ///         .blink(Blink::with_period(10))
+    ///         .colors(Colors::InvertedReset)
+    ///         .extent(Extent::Underline { height: 2 }),
+    /// );
+    ///
+    /// backend.set_cursor_extent(Extent::VerticalBar { width: 2 });
+    /// ```
     fn set_cursor_extent(&mut self, extent: Extent);
 
     /// Returns the source of the content that the cursor uses to symbolize itself.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[cfg(not(all(feature = "alloc", feature = "font-8x24", feature = "font-4-bits")))]
+    /// # {
+    /// #     compile_error!("doc-test is missing required features");
+    /// # }
+    /// #
+    /// use dumo::blink::Blink;
+    /// use dumo::cursor::{Colors, Cursor, Symbol};
+    /// use dumo::fonts::*;
+    /// use dumo::{ConfigureCursorWrapper, DumoBackend};
+    /// # use embedded_graphics::mock_display::MockDisplay;
+    /// # use embedded_graphics::pixelcolor::Rgb565;
+    ///
+    /// # let mut display: MockDisplay<Rgb565> = MockDisplay::new();
+    /// let backend = DumoBackend::new(&mut display, &FONT_8X24_4_BITS).with_cursor(
+    ///     Cursor::default()
+    ///         .blink(Blink::with_period(10))
+    ///         .colors(Colors::InvertedReset)
+    ///         .symbol(Symbol::Custom("🮕🮕")),
+    /// );
+    ///
+    /// let cursor_symbol = backend.get_cursor_symbol();
+    /// ```
     fn get_cursor_symbol(&self) -> Symbol<'a>;
 
     /// Sets the source of the content that the cursor uses to symbolize itself.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[cfg(not(all(feature = "alloc", feature = "font-8x24", feature = "font-4-bits")))]
+    /// # {
+    /// #     compile_error!("doc-test is missing required features");
+    /// # }
+    /// #
+    /// use dumo::blink::Blink;
+    /// use dumo::cursor::{Colors, Cursor, Symbol};
+    /// use dumo::fonts::*;
+    /// use dumo::{ConfigureCursorWrapper, DumoBackend};
+    /// # use embedded_graphics::mock_display::MockDisplay;
+    /// # use embedded_graphics::pixelcolor::Rgb565;
+    ///
+    /// # let mut display: MockDisplay<Rgb565> = MockDisplay::new();
+    /// let mut backend = DumoBackend::new(&mut display, &FONT_8X24_4_BITS).with_cursor(
+    ///     Cursor::default()
+    ///         .blink(Blink::with_period(10))
+    ///         .colors(Colors::InvertedReset)
+    ///         .symbol(Symbol::Custom("🮕🮕")),
+    /// );
+    ///
+    /// backend.set_cursor_symbol(Symbol::UnderCursor);
+    /// ```
     fn set_cursor_symbol(&mut self, symbol: Symbol<'a>);
 }
 
@@ -88,6 +296,31 @@ where
     /// Creates a new wrapper around the specified backend, configuring the appearance of a cursor,
     /// indicating the last position that [`Backend::set_cursor_position`] receives as a parameter,
     /// first being positioned at the [`ORIGIN`](ratatui_core::layout::Position::ORIGIN).
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[cfg(not(all(feature = "alloc", feature = "font-8x24", feature = "font-4-bits")))]
+    /// # {
+    /// #     compile_error!("doc-test is missing required features");
+    /// # }
+    /// #
+    /// use dumo::blink::Blink;
+    /// use dumo::cursor::{Colors, Cursor, Extent};
+    /// use dumo::fonts::*;
+    /// use dumo::{CursorWrapper, DumoBackend};
+    /// # use embedded_graphics::mock_display::MockDisplay;
+    /// # use embedded_graphics::pixelcolor::Rgb565;
+    ///
+    /// # let mut display: MockDisplay<Rgb565> = MockDisplay::new();
+    /// let wrapper = CursorWrapper::new(
+    ///     DumoBackend::new(&mut display, &FONT_8X24_4_BITS),
+    ///     Cursor::default()
+    ///         .blink(Blink::with_period(10))
+    ///         .colors(Colors::InvertedReset)
+    ///         .extent(Extent::Underline { height: 2 }),
+    /// );
+    /// ```
     pub const fn new(backend: B, cursor: Cursor<'a>) -> Self {
         Self {
             backend,

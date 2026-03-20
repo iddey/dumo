@@ -199,10 +199,10 @@ pub fn run(target: &mut impl DrawTarget<Color = Rgb565, Error: core::fmt::Debug>
 This code example demonstrates [Option B](#option-b---invoking-a-macro) and the `backend` in action.
 
 ```rust
-use dumo::{ConfigureBackend, DumoBackend};
 use dumo::blink::Blink;
 use dumo::cursor::Cursor;
 use dumo::error::Error;
+use dumo::{ConfigureBackend, DumoBackend};
 use embedded_graphics::prelude::*;
 use embedded_graphics::pixelcolor::Rgb565;
 use ratatui::{Frame, Terminal};
@@ -215,7 +215,8 @@ where
     let bitmap_font = dumo::font_8x24!(4, /* ... */);
     let bitmap_font_bold = dumo::font_8x24_bold!(4, /* ... */);
 
-    // Create a backend with a regular font and also add three wrappers
+    // Create a backend with a regular font and also add three wrappers,
+    // which can be done in any order, their effect will be identical
     let mut backend = DumoBackend::new(target, &bitmap_font)
         // Set up `.slow_blink()` and `.rapid_blink()` style modifiers
         .with_blink(Blink::with_period(16), Blink::with_period(8))
