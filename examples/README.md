@@ -25,8 +25,8 @@ the [`tui-big-text`] crate. The screen resolution is 240×240 pixels, and the bi
 size of 6×16 pixels.
 
 <picture>
-    <source srcset="../assets/clock-animation.webp" type="image/webp" width="480" height="480" />
-    <img src="../assets/clock-animation.gif" alt="clock" width="480" height="480" />
+    <source srcset="https://raw.githubusercontent.com/iddey/dumo/refs/heads/main/assets/clock-animation.webp" type="image/webp" width="480" height="480" />
+    <img src="https://raw.githubusercontent.com/iddey/dumo/refs/heads/main/assets/clock-animation.gif" alt="clock" width="480" height="480" />
 </picture>
 
 [`RatatuiLogo`]: https://docs.rs/ratatui/latest/ratatui/widgets/struct.RatatuiLogo.html
@@ -48,8 +48,8 @@ The palettes shown here are provided by the [`Palettes`] trait. The bitmap font 
 only render the full block character at a size of 6×16 pixels to fill an area of 240×240 pixels.
 
 <picture>
-    <source srcset="../assets/built-in-palettes.webp" type="image/webp" width="480" height="480" />
-    <img src="../assets/built-in-palettes.gif" alt="palettes" width="480" height="480" />
+    <source srcset="https://raw.githubusercontent.com/iddey/dumo/refs/heads/main/assets/built-in-palettes.webp" type="image/webp" width="480" height="480" />
+    <img src="https://raw.githubusercontent.com/iddey/dumo/refs/heads/main/assets/built-in-palettes.gif" alt="palettes" width="480" height="480" />
 </picture>
 
 [`Palettes`]: https://docs.rs/dumo/latest/dumo/color/trait.Palettes.html
@@ -75,8 +75,8 @@ effects work; however, it requires running the example.
 [`Modifier`]: https://docs.rs/ratatui/latest/ratatui/style/struct.Modifier.html
 
 <picture>
-    <source srcset="../assets/style-modifiers.webp" type="image/webp" width="480" height="480" />
-    <img src="../assets/style-modifiers.gif" alt="styles-1" width="480" height="480" />
+    <source srcset="https://raw.githubusercontent.com/iddey/dumo/refs/heads/main/assets/style-modifiers.webp" type="image/webp" width="480" height="480" />
+    <img src="https://raw.githubusercontent.com/iddey/dumo/refs/heads/main/assets/style-modifiers.gif" alt="styles-1" width="480" height="480" />
 </picture>
 
 ## Cursor settings

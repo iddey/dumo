@@ -1,6 +1,6 @@
 <picture>
-    <source srcset="assets/dumo-0.1@3x.webp" type="image/webp" width="400" height="185" />
-    <img align="right" src="assets/dumo-0.1@3x.png" alt="banner-1" width="400" height="185" />
+    <source srcset="https://raw.githubusercontent.com/iddey/dumo/refs/heads/main/assets/dumo-0.1@3x.webp" type="image/webp" width="400" height="185" />
+    <img align="right" src="https://raw.githubusercontent.com/iddey/dumo/refs/heads/main/assets/dumo-0.1@3x.png" alt="banner-1" width="400" height="185" />
 </picture>
 
 **Dumo** ([/ˈduːmoʊ/](https://ipa-reader.com/?text=%CB%88du%CB%90mo%CA%8A), pronounced `doo-mo`;
@@ -10,15 +10,15 @@ for [`ratatui`] v0.30.0 “Bryndza” built on the [`ratatui-core`] crate.
 Build terminal-style user interfaces for small low-resolution displays, such as this 160×80 screen…
 
 <picture>
-    <source srcset="assets/ratatui-tabs-cropped.webp" type="image/webp" width="320" height="120" />
-    <img src="assets/ratatui-tabs-cropped.gif" alt="ratatui-tabs" width="320" height="120" />
+    <source srcset="https://raw.githubusercontent.com/iddey/dumo/refs/heads/main/assets/ratatui-tabs-cropped.webp" type="image/webp" width="320" height="120" />
+    <img src="https://raw.githubusercontent.com/iddey/dumo/refs/heads/main/assets/ratatui-tabs-cropped.gif" alt="ratatui-tabs" width="320" height="120" />
 </picture>
 
 ***M<sup>+</sup> Code** font in a Ratatui [Tabs](https://ratatui.rs/examples/widgets/tabs) widget.*
 
 <picture>
-    <source srcset="assets/epd-calendar-cropped.webp" type="image/webp" width="400" height="300" />
-    <img align="right" src="assets/epd-calendar-cropped.gif" alt="epd" width="400" height="300" />
+    <source srcset="https://raw.githubusercontent.com/iddey/dumo/refs/heads/main/assets/epd-calendar-cropped.webp" type="image/webp" width="400" height="300" />
+    <img align="right" src="https://raw.githubusercontent.com/iddey/dumo/refs/heads/main/assets/epd-calendar-cropped.gif" alt="epd" width="400" height="300" />
 </picture>
 
 *An e-Paper display with only black and white pixels, showing three ingredients:*

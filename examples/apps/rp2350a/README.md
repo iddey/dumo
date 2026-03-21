@@ -20,7 +20,7 @@ Binaries are uploaded via USB in bootloader mode. Usage: `cargo run --release --
 
   *Waveshare™ RP2350-LCD-0.96*
 
-  <img src="../assets/ratatui-tabs.gif" alt="ratatui-tabs" width="480" height="480" />
+  <img src="https://raw.githubusercontent.com/iddey/dumo/refs/heads/main/examples/apps/assets/ratatui-tabs.gif" alt="ratatui-tabs" width="480" height="480" />
 
 [`Tabs`]: https://docs.rs/ratatui/latest/ratatui/widgets/struct.Tabs.html
 [`FONT_6X16_4_BITS`]: https://docs.rs/dumo/latest/dumo/fonts/constant.FONT_6X16_4_BITS.html
@@ -34,7 +34,7 @@ Binaries are uploaded via USB in bootloader mode. Usage: `cargo run --release --
 
   *WeAct Studio 4.2″ EPD module*
 
-  <img src="../assets/epd-calendar.gif" alt="epd-calendar" width="640" height="480" />
+  <img src="https://raw.githubusercontent.com/iddey/dumo/refs/heads/main/examples/apps/assets/epd-calendar.gif" alt="epd-calendar" width="640" height="480" />
 
 [`List`]: https://docs.rs/ratatui/latest/ratatui/widgets/struct.List.html
 [`calendar::Monthly`]: https://docs.rs/ratatui/latest/ratatui/widgets/calendar/struct.Monthly.html

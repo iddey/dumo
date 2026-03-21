@@ -20,7 +20,7 @@ Binaries are uploaded via USB in bootloader mode. Usage: `cargo run --release --
 
   *LILYGO® T-Display S3*
 
-  <img src="../assets/ratatui-logo.gif" alt="ratatui-logo" width="480" height="480" />
+  <img src="https://raw.githubusercontent.com/iddey/dumo/refs/heads/main/examples/apps/assets/ratatui-logo.gif" alt="ratatui-logo" width="480" height="480" />
 
 [`RatatuiLogo`]: https://docs.rs/ratatui/latest/ratatui/widgets/struct.RatatuiLogo.html
 [`esp-hal`]: https://crates.io/crates/esp-hal/1.0.0
