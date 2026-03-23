@@ -43,9 +43,7 @@ Every `FONT` constant is populated with the subsets of glyphs that are enabled i
 | `font-tui-rect-2x4` *(default)* | Adds 256 Unicode code points, the block octants[^7]           |
 | `font-hiragana`                 | Adds 113 Unicode code points, the hiragana letters[^8]        |
 | `font-katakana`                 | Adds 120 Unicode code points, the katakana letters[^9]        |
-
-This approach is not suitable for every use case as there are no features for adding Unicode blocks
-with ideographs that the underlying TrueType font does include — at least for now, there aren’t.
+| `font-kanji`                    | Adds 5 553 Unicode code points, the kanji characters[^10]     |
 
 Adding grapheme clusters for which no single Unicode code points exist, such as _g̈_ and _y̆_, is not
 supported using the `fonts` module.
@@ -59,6 +57,7 @@ supported using the `fonts` module.
 [^7]: <https://raw.githubusercontent.com/iddey/dumo/refs/heads/main/glyph-subsets/tui-rect-2x4.set>
 [^8]: <https://raw.githubusercontent.com/iddey/dumo/refs/heads/main/glyph-subsets/hiragana.set>
 [^9]: <https://raw.githubusercontent.com/iddey/dumo/refs/heads/main/glyph-subsets/katakana.set>
+[^10]: <https://raw.githubusercontent.com/iddey/dumo/refs/heads/main/glyph-subsets/kanji.set>
 
 ### Option B - Invoking a macro
 

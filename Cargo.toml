@@ -116,6 +116,9 @@ font-hiragana = []
 # Adds 120 Unicode code points, the katakana letters, to each constant enabled.
 font-katakana = []
 
+# Adds 5 553 Unicode code points, the kanji characters, to each constant enabled.
+font-kanji = []
+
 [package.metadata.docs.rs]
 features = [
     "font-6x16",

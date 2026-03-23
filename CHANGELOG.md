@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- A collection of the kanji characters that are supported by the underlying TrueType font, plus a
+  new `font-kanji` feature for adding them to each constant enabled in the `fonts` module.
+
 ## [0.1.0] - 2026-03-20
 
 ### Added

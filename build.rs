@@ -40,6 +40,7 @@ fn write_const_items(src_path: &Path, writer: &mut BufWriter<File>) -> Result<()
 
     let glyph_subsets = [
         cfg!(feature = "font-hiragana").then_some("hiragana.set"),
+        cfg!(feature = "font-kanji").then_some("kanji.set"),
         cfg!(feature = "font-katakana").then_some("katakana.set"),
         cfg!(feature = "font-latin").then_some("latin.set"),
         cfg!(feature = "font-tui-block").then_some("tui-block.set"),
