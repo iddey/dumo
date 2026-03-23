@@ -52,7 +52,7 @@ in the letter **R** for Ratatui — is unavoidable, given that the current e
 FONTS** is not a per-pixel-drawn bitmap font.
 
 Bit depth aside, there’s an option to reduce the amount of flash memory that a bitmap font occupies
-either by not enabling the subsets of glyphs that are not required — for example, Braille patterns,
+either by not enabling the subsets of glyphs that are not required — for example, braille patterns,
 which are one type of [`Marker`] in Ratatui and a popular choice of characters for a [`throbber`] —
 or through the use of a macro in the [`dumo`] crate root, bypassing the [`fonts`] module and adding
 character ranges and strings that need to be made renderable. The font widths used as parameters to
