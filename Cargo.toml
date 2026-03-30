@@ -14,7 +14,7 @@ exclude = ["assets", "examples/README.md"]
 
 [dependencies]
 embedded-graphics = "0.8.2"
-ratatui-core = { version = "0.1.0", features = ["underline-color"] }
+ratatui-core = "0.1.0"
 defmt = { version = "1.0", optional = true }
 mplusfonts = "0.3.3"
 thiserror = { version = "2.0", default-features = false }
@@ -30,6 +30,7 @@ tui-big-text = "0.8.2"
 [features]
 default = [
     "alloc",
+    "underline-color",
     "font-latin",
     "font-tui-block",
     "font-tui-boxes",
@@ -40,6 +41,9 @@ default = [
 
 # Enables the backend wrapper that buffers and redraws text that should blink.
 alloc = ["defmt?/alloc"]
+
+# Enables the backend code that sets the underline color.
+underline-color = ["ratatui-core/underline-color"]
 
 # Allows the types in this crate and its dependencies to be formatted via defmt.
 defmt = ["dep:defmt", "embedded-graphics/defmt", "mplusfonts/defmt"]

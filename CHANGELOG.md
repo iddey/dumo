@@ -6,6 +6,9 @@
 
 - A collection of the kanji characters that are supported by the underlying TrueType font, plus a
   new `font-kanji` feature for adding them to each constant enabled in the `fonts` module.
+- The option to disable the `underline-color` feature of `ratatui-core`, which remains enabled by
+  default. Disabling `underline-color` reduces the size of `Cell`, so buffers and caches also get
+  a smaller memory footprint.
 
 ## [0.1.0] - 2026-03-20
 

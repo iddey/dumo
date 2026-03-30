@@ -655,10 +655,16 @@ where
 
             let is_underlined = cell.modifier.intersects(Modifier::UNDERLINED);
             let underline_color = if is_underlined {
-                cell.underline_color
+                #[cfg(feature = "underline-color")]
+                let underline_color = cell
+                    .underline_color
                     .map_with(self.palette)
                     .map(DecorationColor::Custom)
-                    .unwrap_or(DecorationColor::TextColor)
+                    .unwrap_or(DecorationColor::TextColor);
+                #[cfg(not(feature = "underline-color"))]
+                let underline_color = DecorationColor::TextColor;
+
+                underline_color
             } else {
                 DecorationColor::None
             };
@@ -1021,10 +1027,16 @@ where
 
             let is_underlined = cell.modifier.intersects(Modifier::UNDERLINED);
             let underline_color = if is_underlined && symbol == Symbol::UnderCursor {
-                cell.underline_color
+                #[cfg(feature = "underline-color")]
+                let underline_color = cell
+                    .underline_color
                     .map_with(self.palette)
                     .map(DecorationColor::Custom)
-                    .unwrap_or(DecorationColor::TextColor)
+                    .unwrap_or(DecorationColor::TextColor);
+                #[cfg(not(feature = "underline-color"))]
+                let underline_color = DecorationColor::TextColor;
+
+                underline_color
             } else {
                 DecorationColor::None
             };
