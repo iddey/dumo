@@ -281,17 +281,13 @@ const fn ceil(value: f32) -> u8 {
 macro_rules! impl_palettes_rgb {
     ($($rgb_type:ty),*) => {
         $(
-            impl_palettes!(
-                $rgb_type,
-                r,
-                g,
-                b,
+            impl_palettes!($rgb_type, r, g, b, {
                 <$rgb_type>::new(
                     ceil(<$rgb_type>::MAX_R as f32 * r),
                     ceil(<$rgb_type>::MAX_G as f32 * g),
                     ceil(<$rgb_type>::MAX_B as f32 * b),
                 )
-            );
+            });
         )*
     }
 }
@@ -314,29 +310,41 @@ const fn round(value: f32) -> u8 {
 macro_rules! impl_palettes_gray {
     ($($gray_type:ty),*) => {
         $(
-            impl_palettes!(
-                $gray_type,
-                r,
-                g,
-                b,
+            impl_palettes!($gray_type, r, g, b, {
                 <$gray_type>::new(
                     round(<$gray_type>::MAX_LUMA as f32 * luma(r, g, b))
                 )
-            );
+            });
         )*
     }
 }
 
 impl_palettes_gray!(Gray2, Gray4, Gray8);
 
-impl_palettes!(
-    BinaryColor,
-    r,
-    g,
-    b,
+impl_palettes!(BinaryColor, r, g, b, {
     if luma(r, g, b) < 0.5 {
         BinaryColor::Off
     } else {
         BinaryColor::On
     }
-);
+});
+
+#[cfg(feature = "epd-spectra")]
+impl_palettes!(epd_spectra::TriColor, r, g, b, {
+    use epd_spectra::TriColor;
+
+    // Adapt `impl From<Rgb888> for TriColor` for `f32`.
+    let min = f32::min(f32::min(r, g), b);
+    let max = f32::max(f32::max(r, g), b);
+    let chroma = max - min;
+    let brightness = max;
+
+    // Function to match `impl From<Rgb888> for TriColor`.
+    if chroma > 1.0 / 3.0 && r > g && r > b {
+        TriColor::Red
+    } else if brightness > 0.5 {
+        TriColor::White
+    } else {
+        TriColor::Black
+    }
+});

@@ -128,7 +128,7 @@ and its `strings::skip` and `strings::emit` helper attributes.
 
 ```toml
 [dependencies]
-mplusfonts = "0.3.3"
+mplusfonts = "0.3.4"
 ```
 
 ```rust

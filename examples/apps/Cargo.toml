@@ -31,7 +31,7 @@ panic-halt = "1.0.0"
 portable-atomic = "1.13.1"
 ssd1619a = "0.1.0"
 static_cell = "2.1.1"
-tui-big-text = "0.8.2"
+tui-big-text = "0.8.3"
 
 [workspace.dependencies.ratatui]
 version = "0.30.0"

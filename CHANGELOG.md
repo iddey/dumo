@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [0.1.1] - 2026-03-31
 
 ### Added
 
@@ -9,6 +9,13 @@
 - The option to disable the `underline-color` feature of `ratatui-core`, which remains enabled by
   default. Disabling `underline-color` reduces the size of `Cell`, so buffers and caches also get
   a smaller memory footprint.
+- The `alt-braille`, `alt-jis2004`, and `epd-spectra` features of `mplusfonts 0.3.4` are now also
+  features of `dumo`, with `epd-spectra`’s `TriColor` type implementing `dumo`’s `Palettes` trait.
+
+### Changed
+
+- Upgrade dependencies: `mplusfonts 0.3.4`.
+- Upgrade dev-dependencies: `tui-big-text 0.8.3`.
 
 ## [0.1.0] - 2026-03-20
 
@@ -120,3 +127,4 @@
 [0.1.0-beta.3]: https://github.com/iddey/dumo/releases/tag/v0.1.0-beta.3
 [0.1.0-beta.4]: https://github.com/iddey/dumo/releases/tag/v0.1.0-beta.4
 [0.1.0]: https://github.com/iddey/dumo/releases/tag/v0.1.0
+[0.1.1]: https://github.com/iddey/dumo/releases/tag/v0.1.1

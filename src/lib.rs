@@ -7,8 +7,9 @@
 //! Support for device drivers that define their own color types — multicolor electrophoretic
 //! displays — is implemented behind feature gates in [`mplusfonts`](../mplusfonts/index.html).
 //! The prerequisite for adding such an implementation is that color types must implement the
-//! [`Default`] and [`From<Rgb888>`] traits. As of `dumo` v0.1.0, such e-Paper display driver
-//! crates are unsupported, but `weact-studio-epd` could be the first one to receive support.
+//! [`Default`] and [`From<Rgb888>`] traits. As of `dumo` v0.1.1, such e-Paper display driver
+//! crates, where the color types already implement all of the necessary traits, are limited
+//! to [`epd-spectra`](https://crates.io/crates/epd-spectra).
 //!
 //! Otherwise, display drivers such as [`mipidsi`](https://crates.io/crates/mipidsi) do have
 //! universal support as [`Rgb565`](embedded_graphics::pixelcolor::Rgb565) is defined in the
